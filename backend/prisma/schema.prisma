@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model app_setup {
+  setup_id        Int      @id @default(autoincrement())
+  base_url        String   @db.VarChar(50)
+  default_company String   @db.VarChar(50)
+  ehub_username   String   @db.VarChar(20)
+  ehub_pass       String   @db.VarChar(255)
+  last_modified   DateTime @db.DateTime(0)
+  modified_by     String   @db.VarChar(50)
+}
+
+model applicant_profile {
+  email              String   @id @db.VarChar(50)
+  first_name         String   @db.VarChar(60)
+  middle_name        String?  @db.VarChar(60)
+  last_name          String   @db.VarChar(60)
+  gender             String   @db.VarChar(60) 
+  applicant_address  String?   @db.VarChar(255)
+  national_id_number String   @db.VarChar(50)
+  mobile_no          String   @db.VarChar(60)
+  birth_date         DateTime @db.Date
+  birth_district     String?  @db.VarChar(50)
+  district_of_origin String?   @db.VarChar(50)
+  nationality        String   @db.VarChar(50)
+  passport_number    String?  @db.VarChar(60)
+  marital_status     String   @db.VarChar(60)
+  relative_in_organisation String? @db.VarChar(255)
+
+  last_modified      DateTime @db.Date
+}
+
+model users {
+  id              Int       @id @default(autoincrement())
+  fullname        String    @db.VarChar(255)
+  email           String    @db.VarChar(50) @unique
+  password        String    @db.VarChar(255)
+  otp_secret      String    @db.VarChar(255)
+  otp_expiry      DateTime? @db.DateTime()
+  verified        Boolean
+  profile_created Boolean   @default(false)
+  salt           String    @db.VarChar(255)
+}
+
