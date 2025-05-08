@@ -1,6 +1,5 @@
 import Loading from "@/components/common/Loading";
 import appConfig from "@/configs/app.config";
-import { useAppSelector } from "@/store";
 import { Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "@/components/route/ProtectedRoute";
@@ -23,7 +22,8 @@ type AllRoutesProps = ViewsProps;
 const { authenticatedEntryPath } = appConfig;
 
 const AllRoutes = (props: AllRoutesProps) => {
-  const userAuthority = useAppSelector((state) => state.auth.user.authority);
+  console.log(props);
+  // const userAuthority = useAppSelector((state) => state.auth.user.authority);
 
   return (
     <Routes>
@@ -37,7 +37,12 @@ const AllRoutes = (props: AllRoutesProps) => {
             key={route.key + index}
             path={route.path}
             element={
-              <></>
+              <AppRoute
+                routeKey={route.key}
+                component={route.component}
+                {...route.meta}
+              />
+
               // <AuthorityGuard
               //     userAuthority={userAuthority}
               //     authority={route.authority}

@@ -1,5 +1,4 @@
 import useAuth from "@/utils/hooks/useAuth";
-import { useAppSelector } from "@/store/hook";
 import { lazy, Suspense, useMemo } from "react";
 import Loading from "@/components/common/Loading";
 

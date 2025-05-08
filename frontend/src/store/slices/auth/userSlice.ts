@@ -3,16 +3,16 @@ import { SLICE_BASE_NAME } from './constants'
 
 export type UserState = {
     avatar?: string
-    userName?: string
+    fullName?: string
     email?: string
     authority?: string[]
 }
 
 const initialState: UserState = {
-    avatar: '',
-    userName: '',
+    // avatar: '',
+    // userName: '',
     email: '',
-    authority: [],
+    // authority: [],
 }
 
 const userSlice = createSlice({
@@ -22,9 +22,10 @@ const userSlice = createSlice({
         setUser(state, action: PayloadAction<UserState>) {
             state.avatar = action.payload?.avatar
             state.email = action.payload?.email
-            state.userName = action.payload?.userName
-            state.authority = action.payload?.authority
+            state.fullName = action.payload?.fullName
+            // state.authority = action.payload?.authority
         },
+        
     },
 })
 

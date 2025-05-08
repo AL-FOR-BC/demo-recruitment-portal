@@ -5,7 +5,7 @@ export class UserInput {
   email: string;
 
   @Length(3, 50)
-  fullname: string;
+  fullName: string;
 
   @Length(6, 100)
   password: string;

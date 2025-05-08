@@ -64,7 +64,7 @@ const emailTemplate = `
           <h2>Email Verification</h2>
         </div>
         
-        <p>Hello,{{ fullname }}</p>
+        <p>Hello,{{ fullName }}</p>
         <p>Thank you for registering with ROM E-Recruitment. To complete your registration, please use the verification code below:</p>
         
         <div class="otp-code">
@@ -86,7 +86,7 @@ export const sendEmail = async (
   email: string,
   subject: string,
   otpCode: string,
-  fullname: string
+  fullName: string
 ) => {
   const replaceVariables = (
     template: string,
@@ -99,7 +99,8 @@ export const sendEmail = async (
     }
     return result;
   };
-  const emailHtml = replaceVariables(emailTemplate, { otpCode, fullname });
+  console.log(otpCode, fullName);
+  const emailHtml = replaceVariables(emailTemplate, { otpCode, fullName });
 
   const mailOptions = {
     from: "kalideveloper865@gmail.com",

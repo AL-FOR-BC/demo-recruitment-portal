@@ -2,11 +2,11 @@ import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useNavigate } from "react-router-dom";
 
-interface ThemeSetupProps {
-  onSave?: (config: { primaryColor: string; logo: File | null }) => void;
-}
+// interface ThemeSetupProps {
+//   onSave?: (config: { primaryColor: string; logo: File | null }) => void;
+// }
 
-const ThemeSetup = ({ onSave }: ThemeSetupProps) => {
+const ThemeSetup = () => {
   const navigate = useNavigate();
   const [primaryColor, setPrimaryColor] = useState("#0D55A3");
   const [logo, setLogo] = useState<File | null>(null);

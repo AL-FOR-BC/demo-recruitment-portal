@@ -38,7 +38,7 @@ export const UserSignUp = async (
       return;
     }
 
-    const { email, fullname, password } = userInputs;
+    const { email, fullName, password } = userInputs;
 
     const salt = await GenerateSalt();
     const userPassword = await GeneratePassword(password, salt);
@@ -60,7 +60,7 @@ export const UserSignUp = async (
     const user = await prisma.users.create({
       data: {
         email,
-        fullname,
+        fullname: fullName,
         password: userPassword,
         salt,
         otp_secret: encryptedOtp,
@@ -69,7 +69,7 @@ export const UserSignUp = async (
       },
     });
     if (user) {
-      await sendEmail(email, subject, otp.toString(), fullname);
+      await sendEmail(email, subject, otp.toString(), fullName);
       const signature = await GenerateSignature({
         id: user.id.toString(),
         email: user.email,
@@ -208,7 +208,7 @@ export const UserSignIn = async (
           await sendEmail(
             email,
             user.fullname,
-            "ROM E-Recruitment OTP",
+            `${otp}`,
             "Please verify your email to continue"
           );
           const signature = await GenerateSignature({
@@ -216,32 +216,45 @@ export const UserSignIn = async (
             email: profile.email,
             verified: profile.verified,
           });
-          res.status(400).json({ message: "User not verified", signature });
+          res.status(403).json({
+            message: "User not verified",
+            signature,
+            verified: profile.verified,
+            code: "USER_UNVERIFIED",
+          });
           return;
         }
-
-        const signature = await GenerateSignature({
-          id: profile.id.toString(),
-          email: profile.email,
-          verified: profile.verified,
+        const config = await prisma.bc_configs.findUnique({
+          where: { id: "3" },
         });
+        if (config) {
+          const signature = await GenerateSignature({
+            id: profile.id.toString(),
+            email: profile.email,
+            verified: profile.verified,
+          });
 
-        res.status(200).json({
-          signature,
-          email: profile.email,
-          verified: profile.verified,
-        });
+          res.status(200).json({
+            signature,
+            email: profile.email,
+            verified: profile.verified,
+            fullName: profile.fullname,
+            companyId: config.companyId,
+          });
+        }else{
+          
+        }
         return;
       } else {
-        res.status(400).json({ message: "Invalid Password" });
+        res.status(401).json({ message: "Invalid Password" });
         return;
       }
     } else {
-      res.status(400).json({ message: "User not found" });
+      res.status(401).json({ message: "User not found" });
       return;
     }
   } catch (error) {
-    res.status(400).json({ message: "User not found" });
+    res.status(401).json({ message: "User not found" });
     return;
   }
 };

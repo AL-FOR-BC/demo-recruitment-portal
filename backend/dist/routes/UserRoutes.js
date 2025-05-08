@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserRoutes = void 0;
+const express_1 = require("express");
+const controllers_1 = require("../controllers");
+const CommonAuth_1 = require("../middlewares/CommonAuth");
+const ValidateRequest_1 = require("../middlewares/ValidateRequest");
+const userValidation_1 = require("../validations/userValidation");
+const BcAuthControllers_1 = require("../controllers/BcAuthControllers");
+const router = (0, express_1.Router)();
+exports.UserRoutes = router;
+router.post("/sign-up", (0, ValidateRequest_1.ValidateRequest)(userValidation_1.userValidation.signup), controllers_1.UserSignUp);
+router.post("/sign-in", (0, ValidateRequest_1.ValidateRequest)(userValidation_1.userValidation.signin), controllers_1.UserSignIn);
+router.use(CommonAuth_1.Authenticate);
+router.post("/verify", (0, ValidateRequest_1.ValidateRequest)(userValidation_1.userValidation.verify), controllers_1.UserVerify);
+router.get("/token", BcAuthControllers_1.BCAuthToken);
+router.post("/resend-otp", (0, ValidateRequest_1.ValidateRequest)(userValidation_1.userValidation.resendOtp), controllers_1.ResendOtp);

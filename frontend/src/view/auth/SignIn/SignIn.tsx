@@ -7,7 +7,7 @@ const SignIn = () => {
       title="Welcome Back"
       subtitle="Sign in to continue"
       rightTitle="Welcome to ROM Recruitment Portal"
-      rightSubtitle="Empowering Healthcare Through Digital Innovation"
+      rightSubtitle="Empowering Healthcare Different Part of Uganda"
     >
       <SignInForm disableSubmit={false} />
     </AuthPage>

@@ -6,6 +6,10 @@ import store from "./store";
 import Layout from "@/components/layout/Layout";
 import "./styles/global.css";
 import Theme from "@/theme/Theme";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <Provider store={store}>
@@ -14,6 +18,19 @@ function App() {
           <Layout />
         </Theme>
       </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      <Toaster position="top-right" />
     </Provider>
   );
 }

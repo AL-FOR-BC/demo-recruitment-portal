@@ -7,7 +7,13 @@ declare global {
 
 
 
-const client = globalThis.prisma || new PrismaClient();
+const client = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL
+    }
+  }
+})
 if (process.env.NODE_ENV !== "production") globalThis.prisma = client;
 
 export default client;

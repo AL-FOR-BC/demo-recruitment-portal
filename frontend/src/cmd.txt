@@ -1,1 +1,2 @@
 npm install react-colorful
+npm install react-hot-toast framer-motion

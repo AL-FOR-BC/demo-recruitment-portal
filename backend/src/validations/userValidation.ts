@@ -6,7 +6,7 @@ export const userValidation = {
       "string.email": "Please provide a valid email address",
       "any.required": "Email is required",
     }),
-    fullname: Joi.string().required().min(3).messages({
+    fullName: Joi.string().required().min(3).messages({
       "string.min": "Full name must be at least 3 characters long",
       "any.required": "Full name is required",
     }),

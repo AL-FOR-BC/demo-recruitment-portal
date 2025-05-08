@@ -1,5 +1,3 @@
-import { useEffect, useCallback } from "react";
-import { useAppSelector, useAppDispatch } from "@/store";
 import type { ComponentType } from "react";
 
 export type AppRouteProps<T> = {

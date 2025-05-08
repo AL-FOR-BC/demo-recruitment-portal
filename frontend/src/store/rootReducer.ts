@@ -1,10 +1,14 @@
 import { combineReducers, Reducer, AnyAction } from "redux";
 import auth, { AuthState } from "./slices/auth";
+import app, { AppState } from "./slices/app";
 import RtkQueryService from "@/services/RtkQueryService";
+
 
 // Define RootState without using CombinedState
 export interface RootState {
   auth: AuthState;
+  app: AppState;
+  
   [RtkQueryService.reducerPath]: ReturnType<typeof RtkQueryService.reducer>;
 }
 
@@ -14,6 +18,7 @@ export interface AsyncReducers {
 
 const staticReducers = {
   auth,
+  app,
   [RtkQueryService.reducerPath]: RtkQueryService.reducer,
 };
 

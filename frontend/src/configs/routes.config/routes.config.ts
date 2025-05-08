@@ -1,17 +1,16 @@
 import authRoute from "./authRoute";
-// import appsRoute from './appsRoute'
+import appsRoute from './appsRoute'
 // import uiComponentsRoute from './uiComponentsRoute'
 // import pagesRoute from './pagesRoute'
 // import authDemoRoute from './authDemoRoute'
 // import docsRoute from './docsRoute'
 import type { Routes } from "@/@types/routes";
 import { lazy } from "react";
-import SetupProtection from "@/components/auth/SetupProtection";
 
 export const publicRoutes: Routes = [...authRoute];
 
 export const protectedRoutes: Routes = [
-  // ...appsRoute,
+  ...appsRoute,
   // ...uiComponentsRoute,
   // ...pagesRoute,
   // ...authDemoRoute,
@@ -35,3 +34,4 @@ export const setupRoutes = [
     component: lazy(() => import("@/view/setup/ThemeSetup")),
   },
 ];
+

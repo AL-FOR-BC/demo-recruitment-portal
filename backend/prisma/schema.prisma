@@ -33,7 +33,7 @@ model applicant_profile {
   nationality        String   @db.VarChar(50)
   passport_number    String?  @db.VarChar(60)
   marital_status     String   @db.VarChar(60)
-  relative_in_organisation String? @db.VarChar(255)
+  relative_in_organisation Boolean
 
   last_modified      DateTime @db.Date
 }
@@ -48,5 +48,17 @@ model users {
   verified        Boolean
   profile_created Boolean   @default(false)
   salt           String    @db.VarChar(255)
+}
+
+
+model bc_configs {
+  id           String  @id @default(uuid())
+  tenant       String
+  clientId     String
+  clientSecret String
+  url          String
+  email        String?
+  password     String?
+  companyId String?
 }
 
