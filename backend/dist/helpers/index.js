@@ -10,17 +10,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkDatabaseConnection = exports.isEmptyObject = void 0;
+const factory_1 = require("../database/factory");
 const isEmptyObject = (obj) => {
     return Object.entries(obj).length === 0;
 };
 exports.isEmptyObject = isEmptyObject;
-const checkDatabaseConnection = (prisma, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const checkDatabaseConnection = (res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield prisma.$queryRaw `SELECT 1`;
+        const db = (0, factory_1.getDatabaseAdapterSync)();
+        const isConnected = yield db.checkConnection();
+        if (!isConnected) {
+            return res.status(500).json({ message: "Database connection failed" });
+        }
         next();
     }
     catch (error) {
-        console.error(error);
+        console.error("Database connection check error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 });

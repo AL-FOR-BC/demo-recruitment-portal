@@ -1,2 +1,3 @@
-export * from './UserControllers'
-export * from './ProfileControllers'
+export * from "./UserControllers";
+export * from "./ProfileControllers";
+export * from "./SettingsControllers";

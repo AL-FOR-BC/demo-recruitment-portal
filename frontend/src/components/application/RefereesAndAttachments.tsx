@@ -9,6 +9,7 @@ import {
 } from "@/store/slices/app/applicationSlice";
 import { appServices } from "@/services/AppService";
 import Attachments from "./Attachment";
+import { PageSpinner } from "@/components/common/Spinner";
 
 
 
@@ -201,7 +202,7 @@ const RefereesAndAttachments = () => {
         <div className="overflow-x-auto text-gray-900">
           {isLoading ? (
             <div className="flex items-center justify-center py-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0D55A3]"></div>
+              <PageSpinner />
             </div>
           ) : references.length === 0 ? (
             <div className="text-center py-10 text-gray-500">

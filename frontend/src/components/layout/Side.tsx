@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import logo from "@/assets/logo-rom.png";
+import { useTheme } from "@/utils/hooks/useTheme";
+import { useCompanyName } from "@/utils/hooks/useCompanyName";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -16,6 +18,11 @@ const Side = ({
   rightTitle,
   rightSubtitle,
 }: AuthLayoutProps) => {
+  const { primaryColor, logo: themeLogo } = useTheme();
+  const displayLogo = themeLogo || logo;
+  const bgColor = primaryColor || "#094BAC";
+  const companyName = useCompanyName();
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
       {/* Main Card */}
@@ -32,10 +39,13 @@ const Side = ({
         </div>
 
         {/* Right Section - Blue Background with Content */}
-        <div className="w-1/2 bg-[#0D55A3] p-12 flex flex-col justify-between relative overflow-hidden">
+        <div
+          className="w-1/2 p-12 flex flex-col justify-between relative overflow-hidden"
+          style={{ backgroundColor: bgColor }}
+        >
           {/* Main Content */}
           <div className="text-white space-y-6 relative z-10 mb-20">
-            <img src={logo} alt="ROM" className="mb-8 h-40" />
+            <img src={displayLogo} alt={companyName} className="mb-8 h-40" />
             <h2 className="text-3xl font-bold leading-tight">{rightTitle}</h2>
             <p className="text-2xl text-white/90 max-w-md leading-relaxed">
               {rightSubtitle}

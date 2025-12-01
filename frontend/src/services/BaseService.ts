@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import appConfig from "@/configs/app.config";
 import { TOKEN_TYPE, REQUEST_HEADER_AUTH_KEY } from "@/constants/api.constant";
 import { PERSIST_STORE_NAME } from "@/constants/app.constant";
@@ -6,12 +6,15 @@ import deepParseJson from "@/utils/deepParseJson";
 import store, { signOutSuccess } from "../store";
 import { toast } from "react-toastify";
 
-const unauthorizedCode = [401];
-const environment = "production";
+// const unauthorizedCode = [401];
+const environment = "development" as "development" | "production" | "test";
 
 const BaseService = axios.create({
   timeout: 60000,
-  baseURL: environment === "production" ? "/api-recruitment" : appConfig.apiPrefix,
+  baseURL:
+    environment === "development"
+      ? "http://localhost:8001/api"
+      : appConfig.apiPrefix,
 });
 
 BaseService.interceptors.request.use(
@@ -41,46 +44,63 @@ BaseService.interceptors.request.use(
 
 BaseService.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const { response } = error;
+  (error: AxiosError) => {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      const status = error.response.status;
+      const data = error.response.data as any;
 
-    if (response && unauthorizedCode.includes(response.status)) {
-      store.dispatch(signOutSuccess());
-      toast.error("Session expired. Please sign in again.");
-      return Promise.reject(error);
-    }
-
-    // Handle validation errors (400 Bad Request)
-    if (response?.status === 400 && response.data) {
-      if (response.data.errors?.length) {
-        return Promise.reject({
-          ...error,
-          response: {
-            ...response,
-            data: {
-              status: "400",
-              errors: response.data.errors,
-              message: response.data.message,
-            },
-          },
-        });
+      switch (status) {
+        case 400:
+          return Promise.reject({
+            message: data.message || "Bad Request",
+            statusCode: status,
+          });
+        case 401:
+          // Handle unauthorized access
+          store.dispatch(signOutSuccess());
+          toast.error("Session expired. Please sign in again.");
+          return Promise.reject({
+            message: "Session expired. Please sign in again.",
+            statusCode: status,
+          });
+        case 403:
+          return Promise.reject({
+            message: data.message || "Access forbidden",
+            statusCode: status,
+          });
+        case 404:
+          return Promise.reject({
+            message: data.message || "Resource not found",
+            statusCode: status,
+          });
+        case 500:
+          toast.error("Internal server error. Please try again later.");
+          return Promise.reject({
+            message: "Internal server error. Please try again later.",
+            statusCode: status,
+          });
+        default:
+          return Promise.reject({
+            message: data.message || "An unexpected error occurred",
+            statusCode: status,
+          });
       }
-    }
-
-    // Handle other errors
-    if (response?.data?.message) {
-      // toast.error(response.data.message);
-    }
-    // else if (response?.status === 404) {
-    //   toast.error("Service not found");
-    // }
-    else if (response?.status === 500) {
-      toast.error("Internal server error. Please try again later.");
-    } else if (!response) {
+    } else if (error.request) {
+      // The request was made but no response was received
       toast.error("Network error. Please check your connection.");
+      return Promise.reject({
+        message: "Network Error",
+        statusCode: 0,
+      });
+    } else {
+      // Something happened in setting up the request
+      return Promise.reject({
+        message: error.message,
+        statusCode: 0,
+      });
     }
-
-    return Promise.reject(error);
   }
 );
 

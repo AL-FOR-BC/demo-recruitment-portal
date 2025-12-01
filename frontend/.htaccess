@@ -1,0 +1,18 @@
+# Handle recruitment-app routes
+RewriteEngine On
+
+# Force redirect from root to /recruitment-app/ directory
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^$ /recruitment-app/ [L,R=301]
+
+# Handle /recruitment-app/ directory requests
+RewriteCond %{REQUEST_URI} !^/recruitment-app/.*$
+RewriteRule ^recruitment-app/([a-zA-Z0-9_-]+)$ /recruitment-app/$1/ [L,R=301]
+
+# Handle recruitment-app SPA routes
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_URI} ^/recruitment-app/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^recruitment-app/(.*)$ /recruitment-app/index.html [L]
+</IfModule>

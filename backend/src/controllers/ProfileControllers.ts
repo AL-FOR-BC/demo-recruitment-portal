@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import prisma from "../prismadb";
+import { getDB } from "../utils/database";
 import { RequestHandler } from "express";
 
 export const CreateProfile: RequestHandler = async (
@@ -14,7 +14,8 @@ export const CreateProfile: RequestHandler = async (
       return;
     }
 
-    const existingProfile = await prisma.applicant_profile.findUnique({
+    const db = getDB();
+    const existingProfile = await db.applicant_profile.findUnique({
       where: {
         email: user.email,
       },
@@ -42,7 +43,7 @@ export const CreateProfile: RequestHandler = async (
       relative_in_organisation,
     } = req.body;
 
-    const profile = await prisma.applicant_profile.create({
+    const profile = await db.applicant_profile.create({
       data: {
         email: user.email,
         first_name,
@@ -82,7 +83,8 @@ export const UpdateProfile: RequestHandler = async (
       return;
     }
 
-    const existingProfile = await prisma.applicant_profile.findUnique({
+    const db = getDB();
+    const existingProfile = await db.applicant_profile.findUnique({
       where: {
         email: user.email,
       },
@@ -110,7 +112,7 @@ export const UpdateProfile: RequestHandler = async (
       relative_in_organisation,
     } = req.body;
 
-    const profile = await prisma.applicant_profile.update({
+    const profile = await db.applicant_profile.update({
       where: {
         email: user.email,
       },
@@ -152,11 +154,36 @@ export const GetUserProfile: RequestHandler = async (
       return;
     }
 
-    const profile = await prisma.applicant_profile.findUnique({
-      where: {
-        email: user.email,
-      },
-    });
+    const db = getDB();
+    let profile;
+    try {
+      profile = await db.applicant_profile.findUnique({
+        where: {
+          email: user.email,
+        },
+      });
+    } catch (dbError: any) {
+      // If database query fails, check if it's a "not found" type error
+      console.error("Database query error:", dbError);
+      // Check for Prisma "not found" error (P2025)
+      if (dbError?.code === "P2025") {
+        res.status(404).json({ message: "Profile not found" });
+        return;
+      }
+      // Check for Mongoose cast errors or other "not found" indicators
+      if (
+        dbError?.name === "CastError" ||
+        (dbError instanceof Error &&
+          (dbError.message.includes("Record to find does not exist") ||
+            dbError.message.includes("not found") ||
+            dbError.message.includes("No document found")))
+      ) {
+        res.status(404).json({ message: "Profile not found" });
+        return;
+      }
+      // Re-throw if it's a real database error
+      throw dbError;
+    }
 
     if (!profile) {
       res.status(404).json({ message: "Profile not found" });
@@ -167,8 +194,20 @@ export const GetUserProfile: RequestHandler = async (
       ...profile,
       birth_date: profile.birth_date?.toISOString().split("T")[0],
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Get Profile Error:", error);
+    // Final check for "not found" errors
+    if (
+      error?.code === "P2025" ||
+      error?.name === "CastError" ||
+      (error instanceof Error &&
+        (error.message.includes("Record to find does not exist") ||
+          error.message.includes("not found") ||
+          error.message.includes("No document found")))
+    ) {
+      res.status(404).json({ message: "Profile not found" });
+      return;
+    }
     res.status(500).json({ message: "Error fetching profile" });
   }
 };

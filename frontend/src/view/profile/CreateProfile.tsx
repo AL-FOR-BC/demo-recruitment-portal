@@ -7,6 +7,10 @@ import { nationalities } from "@/data/nationalities";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
+import { toast } from "react-hot-toast";
+import { useTheme } from "@/utils/hooks/useTheme";
+import { Spinner } from "@/components/common/Spinner";
 
 // Add interface for the select option
 interface NationalityOption {
@@ -17,6 +21,8 @@ interface NationalityOption {
 const CreateProfile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { primaryColor } = useTheme();
+  const themeColor = primaryColor || "#094BAC";
   const [errors, setErrors] = useState<{
     national_id_number?: string;
   }>({});
@@ -27,7 +33,6 @@ const CreateProfile = () => {
     middle_name: "",
     mobile_no: "",
     birth_date: "",
-    birth_district: "",
     district_of_origin: "",
     marital_status: "",
     nationality: "",
@@ -71,6 +76,16 @@ const CreateProfile = () => {
     }
   };
 
+  const handleNINBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value && !validateNIN(value)) {
+      setErrors({
+        national_id_number: "Invalid National ID format.",
+      });
+      toast.error("Invalid National ID format.");
+    }
+  };
+
   // Find the current nationality option for the select
   const selectedNationality = nationalityOptions.find(
     (option) => option.value === formData.nationality
@@ -87,12 +102,33 @@ const CreateProfile = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    //  disclaimer that your profile will you informantion will be used for the purpose of the recruitment process
+    const result = await Swal.fire({
+      title: "Disclaimer",
+      text: "Your profile information will be used for the purpose of the recruitment process",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "I agree",
+      cancelButtonText: "I disagree",
+      confirmButtonColor: "#0D55A3",
+      cancelButtonColor: "#dc2626",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) {
+      navigate("/dashboard");
+      return;
+    }
+
     // Validate NIN before submission
     if (!validateNIN(formData.national_id_number)) {
       setErrors({
         national_id_number:
-          "Invalid National ID format. Expected format: CMYYNNNNNNNNN (e.g. CM99123456789)",
+          "Invalid National ID format. Format should be: CM/CF + YY + 6 digits + 4 letters (e.g., CM97046100XNKL)",
       });
+      toast.error(
+        "Invalid National ID format. Format should be: CM/CF + YY + 6 digits + 4 letters (e.g., CM97046100XNKL for male, CF97046100XNKL for female)"
+      );
       return;
     }
 
@@ -109,12 +145,12 @@ const CreateProfile = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Create Your Profile
           </h1>
-          <p className="text-gray-600 mt-2 text-lg">
+          <p className="text-sm sm:text-lg text-gray-600 mt-2">
             Please fill in your information to complete your profile
           </p>
         </div>
@@ -124,15 +160,15 @@ const CreateProfile = () => {
           className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
         >
           {/* Personal Information Section */}
-          <div className="space-y-8 p-8 text-black">
-            <div className="border-b border-gray-200 pb-8">
-              <div className="flex items-center gap-2 mb-6">
+          <div className="space-y-6 sm:space-y-8 p-4 sm:p-8 text-black">
+            <div className="border-b border-gray-200 pb-6 sm:pb-8">
+              <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <div className="h-8 w-1 bg-[#0D55A3] rounded-full"></div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Personal Information
                 </h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     First Name <span className="text-red-500">*</span>
@@ -178,14 +214,14 @@ const CreateProfile = () => {
             </div>
 
             {/* Contact Information */}
-            <div className="border-b border-gray-200 pb-8">
-              <div className="flex items-center gap-2 mb-6">
+            <div className="border-b border-gray-200 pb-6 sm:pb-8">
+              <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <div className="h-8 w-1 bg-[#0D55A3] rounded-full"></div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Contact Information
                 </h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Mobile Number <span className="text-red-500">*</span>
@@ -193,6 +229,7 @@ const CreateProfile = () => {
                   <input
                     type="tel"
                     name="mobile_no"
+                    maxLength={10}
                     value={formData.mobile_no}
                     onChange={handleChange}
                     required
@@ -218,14 +255,14 @@ const CreateProfile = () => {
             </div>
 
             {/* Personal Details */}
-            <div className="border-b border-gray-200 pb-8 ">
-              <div className="flex items-center gap-2 mb-6">
+            <div className="border-b border-gray-200 pb-6 sm:pb-8">
+              <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <div className="h-8 w-1 bg-[#0D55A3] rounded-full"></div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Personal Details
                 </h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date of Birth <span className="text-red-500">*</span>
@@ -264,20 +301,6 @@ const CreateProfile = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Birth District <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="birth_district"
-                    value={formData.birth_district}
-                    onChange={handleChange}
-                    required
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3] transition-all duration-200"
-                    placeholder="Enter your birth district"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     District of Origin <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -295,13 +318,13 @@ const CreateProfile = () => {
 
             {/* Additional Information */}
             <div>
-              <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <div className="h-8 w-1 bg-[#0D55A3] rounded-full"></div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Additional Information
                 </h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nationality <span className="text-red-500">*</span>
@@ -370,17 +393,19 @@ const CreateProfile = () => {
                     type="text"
                     name="national_id_number"
                     value={formData.national_id_number}
+                    maxLength={14}
                     onChange={handleChange}
+                    onBlur={handleNINBlur}
                     required
-                    placeholder="e.g. CM99123456789"
+                    placeholder="e.g. CM97046100XNKL"
                     className={`w-full p-3 border ${
                       errors.national_id_number
-                        ? "border-red-500 focus:ring-red-500"
+                        ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:ring-[#0D55A3]/50"
                     } rounded-lg focus:outline-none focus:ring-2 focus:border-[#0D55A3] transition-all duration-200`}
                   />
                   {errors.national_id_number && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="mt-1 text-sm text-red-500">
                       {errors.national_id_number}
                     </p>
                   )}
@@ -399,7 +424,7 @@ const CreateProfile = () => {
                   />
                 </div>
               </div>
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -412,33 +437,52 @@ const CreateProfile = () => {
                     Do you have any relatives in the organisation?
                   </span>
                 </label>
-              </div>
+              </div> */}
             </div>
-          </div>
 
-          {/* Form Actions */}
-          <div className="px-8 py-6 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => navigate("/profile")}
-              className="px-6 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2.5 text-white bg-[#0D55A3] rounded-lg hover:bg-[#0D55A3]/90 focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating...</span>
-                </>
-              ) : (
-                "Create Profile"
-              )}
-            </button>
+            {/* Submit Button */}
+            <div className="flex justify-end pt-4 sm:pt-6">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto px-6 py-3 text-white rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: themeColor,
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = `${themeColor}E6`;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = themeColor;
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Spinner variant="button" size="sm" />
+                    Creating Profile...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Create Profile
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

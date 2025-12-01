@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useTheme } from "@/utils/hooks/useTheme";
 
 interface SignUpFormProps {
   disableSubmit?: boolean;
@@ -30,7 +31,9 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { signUp } = useAuth();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { primaryColor } = useTheme();
+  const themeColor = primaryColor || "#094BAC";
 
   // Check passwords match on every change
   useEffect(() => {
@@ -61,7 +64,9 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
     try {
       const result = (await signUp(data)) as ApiResponse;
 
-      if (result.errors?.length) {
+      if (result.status === "failed" && result.message) {
+        toast.error(result.message);
+      } else if (result.errors?.length) {
         // Handle validation errors
         const newFieldErrors: Record<string, string> = {};
         result.errors.forEach((err) => {
@@ -73,11 +78,9 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
         toast.error(result.errors[0].message);
       } else if (result.status === "success") {
         toast.success(
-          "Account created successfully Please procced to check youe eamli of otp!"
+          "Account created successfully! Please proceed to check your email for OTP!"
         );
-        navigate("/otp");
-      } else if (result.message) {
-        toast.error(result.message);
+        navigate("/otp", { state: { email: email, isPasswordReset: false } });
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -100,9 +103,22 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           value={fullName}
           onChange={(e) => setfullName(e.target.value)}
           placeholder="John Doe"
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3] text-gray-600 ${
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
             fieldErrors.fullName ? "border-red-500" : "border-gray-200"
           }`}
+          style={{
+            '--tw-ring-color': `${themeColor}50`,
+          } as React.CSSProperties}
+          onFocus={(e) => {
+            if (!fieldErrors.fullName) {
+              e.currentTarget.style.borderColor = themeColor;
+            }
+          }}
+          onBlur={(e) => {
+            if (!fieldErrors.fullName) {
+              e.currentTarget.style.borderColor = '';
+            }
+          }}
           required
         />
         {fieldErrors.fullName && (
@@ -119,9 +135,22 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="john.doe@example.com"
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3] text-gray-600 ${
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
             fieldErrors.email ? "border-red-500" : "border-gray-200"
           }`}
+          style={{
+            '--tw-ring-color': `${themeColor}50`,
+          } as React.CSSProperties}
+          onFocus={(e) => {
+            if (!fieldErrors.email) {
+              e.currentTarget.style.borderColor = themeColor;
+            }
+          }}
+          onBlur={(e) => {
+            if (!fieldErrors.email) {
+              e.currentTarget.style.borderColor = '';
+            }
+          }}
           required
         />
         {fieldErrors.email && (
@@ -139,7 +168,16 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3] text-gray-600"
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all"
+            style={{
+              '--tw-ring-color': `${themeColor}50`,
+            } as React.CSSProperties}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = themeColor;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '';
+            }}
             required
           />
           <button
@@ -162,9 +200,22 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••"
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3] text-gray-600 ${
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
               passwordError ? "border-red-500" : "border-gray-200"
             }`}
+            style={{
+              '--tw-ring-color': `${themeColor}50`,
+            } as React.CSSProperties}
+            onFocus={(e) => {
+              if (!passwordError) {
+                e.currentTarget.style.borderColor = themeColor;
+              }
+            }}
+            onBlur={(e) => {
+              if (!passwordError) {
+                e.currentTarget.style.borderColor = '';
+              }
+            }}
             required
           />
           <button
@@ -188,16 +239,20 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
         <input
           type="checkbox"
           id="terms"
-          className="w-4 h-4 text-[#0D55A3] border-gray-300 rounded focus:ring-[#0D55A3]"
+          className="w-4 h-4 border-gray-300 rounded focus:ring-2"
+          style={{
+            accentColor: themeColor,
+            '--tw-ring-color': themeColor,
+          } as React.CSSProperties}
           required
         />
         <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
           I agree to the{" "}
-          <a href="/terms" className="text-[#0D55A3] hover:text-[#0D55A3]/80">
+          <a href="/terms" className="hover:opacity-80 transition-colors" style={{ color: themeColor }}>
             Terms of Service
           </a>{" "}
           and{" "}
-          <a href="/privacy" className="text-[#0D55A3] hover:text-[#0D55A3]/80">
+          <a href="/privacy" className="hover:opacity-80 transition-colors" style={{ color: themeColor }}>
             Privacy Policy
           </a>
         </label>
@@ -206,7 +261,18 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
       <button
         type="submit"
         disabled={disableSubmit}
-        className="w-full py-3.5 px-4 bg-[#0D55A3] hover:bg-[#0D55A3]/90 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3.5 px-4 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ 
+          backgroundColor: themeColor,
+        }}
+        onMouseEnter={(e) => {
+          if (!e.currentTarget.disabled) {
+            e.currentTarget.style.backgroundColor = `${themeColor}E6`;
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = themeColor;
+        }}
       >
         Create Account
       </button>
@@ -214,8 +280,9 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
       <p className="text-center text-gray-500 text-sm">
         Already have an account?{" "}
         <a
-          href="/signin"
-          className="text-[#0D55A3] font-medium hover:text-[#0D55A3]/80"
+          onClick={() => navigate("/sign-in")}
+          className="font-medium hover:opacity-80 transition-colors cursor-pointer"
+          style={{ color: themeColor }}
         >
           Sign in
         </a>

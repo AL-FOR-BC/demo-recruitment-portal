@@ -5,6 +5,9 @@ import {
   UserSignIn,
   UserSignUp,
   UserVerify,
+  ForgotPassword,
+  ResetPassword,
+  VefiyOtpResetPassword,
 } from "../controllers";
 import { Authenticate } from "../middlewares/CommonAuth";
 import { ValidateRequest } from "../middlewares/ValidateRequest";
@@ -17,6 +20,11 @@ router.post("/sign-up", ValidateRequest(userValidation.signup), UserSignUp);
 
 router.post("/sign-in", ValidateRequest(userValidation.signin), UserSignIn);
 
+router.post("/forgot-password", ForgotPassword);
+
+router.post("/verify-reset-password", VefiyOtpResetPassword);
+
+router.post("/reset-password", ResetPassword);
 router.use(Authenticate);
 
 router.post("/verify", ValidateRequest(userValidation.verify), UserVerify);
@@ -28,5 +36,8 @@ router.post(
   ValidateRequest(userValidation.resendOtp),
   ResendOtp
 );
+
+router.post("/forgot-password", ForgotPassword);
+router.post("/reset-password", ResetPassword);
 
 export { router as UserRoutes };

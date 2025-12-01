@@ -12,8 +12,6 @@ import {
 import { BaseApiService } from "./BcApiSerivce";
 import { ODataResponse } from "@/@types/api";
 
-
-
 class AppServices extends BaseApiService {
   protected endpoint = "HRMLeaveRequests";
   protected version = "v2.0";
@@ -653,6 +651,25 @@ class AppServices extends BaseApiService {
         companyId,
         customEndpoint: "documentAttachments",
         data: fileData,
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateAcademicQualification(
+    companyId: string,
+    systemId: string,
+    data: CreateAcademicQualificationRequest
+  ): Promise<any> {
+    try {
+      const response = await this.update<any>({
+        companyId,
+        systemId,
+        customEndpoint: "ApplicantEducation",
+        data,
+        etag: "*",
       });
       return response;
     } catch (error) {

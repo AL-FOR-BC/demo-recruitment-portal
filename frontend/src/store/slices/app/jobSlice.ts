@@ -55,16 +55,17 @@ const filterJobsByUserAccess = (
 // Create async thunk for fetching jobs
 export const fetchJobs = createAsyncThunk<
   JobPosition[],
-  FetchJobsParams & { userEmail?: string },
+  
+  FetchJobsParams & { userEmail?: string; filterQuery?: string },
   { rejectValue: string }
 >(
   "jobs/fetchJobs",
-  async ({ companyId, expand, endpoint, userEmail }, { rejectWithValue }) => {
+  async ({ companyId, endpoint, userEmail, filterQuery }, { rejectWithValue }) => {
     try {
       const response = await appServices.getJobs(
         companyId,
-        expand,
-        endpoint || "RecruitmentProjectPositions"
+        filterQuery,
+        endpoint || "RecruitmentProjectPositions",
       );
       // Filter jobs based on user email
       return filterJobsByUserAccess(response.value, userEmail);

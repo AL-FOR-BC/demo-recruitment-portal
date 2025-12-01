@@ -27,7 +27,6 @@ const appsRoute: Routes = [
     authority: [],
   },
   {
-
     key: "apps.jobDetails",
     path: `/job-details/:jobId`,
     component: lazy(() => import("@/view/dashboard/JobDetails")),

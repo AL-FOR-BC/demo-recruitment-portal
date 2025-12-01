@@ -6,9 +6,8 @@ import { toast } from "react-hot-toast";
 import "react-datepicker/dist/react-datepicker.css";
 import { appServices } from "@/services/AppService";
 import { useAppDispatch, useAppSelector } from "@/store";
-import {
-  getWorkExperience,
-} from "@/store/slices/app/applicationSlice";
+import { getWorkExperience } from "@/store/slices/app/applicationSlice";
+import { PageSpinner } from "@/components/common/Spinner";
 // import { appServices } from "../../services/appServices";
 
 interface WorkExperience {
@@ -22,8 +21,6 @@ interface WorkExperience {
   experiencePosition: string;
   experienceDuties: string;
 }
-
-
 
 const WorkExperience = () => {
   const dispatch = useAppDispatch();
@@ -43,9 +40,7 @@ const WorkExperience = () => {
   });
   const { companyId } = useAppSelector((state) => state.auth.session);
   const { applicationNo } = useAppSelector((state) => state.app.application);
-  const { workExperience } = useAppSelector(
-    (state) => state.app.application
-  );
+  const { workExperience } = useAppSelector((state) => state.app.application);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -224,7 +219,7 @@ const WorkExperience = () => {
       <div className="overflow-x-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0D55A3]"></div>
+            <PageSpinner />
           </div>
         ) : workExperience.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
@@ -378,16 +373,21 @@ const WorkExperience = () => {
             </div>
           </div>
 
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Duties & Responsibilities <span className="text-red-500">*</span>
             </label>
+            
             <textarea
               value={currentExperience.experienceDuties}
               onChange={(e) => handleChange("experienceDuties", e.target.value)}
               rows={3}
+              maxLength={50}
               className="w-full p-3 border text-gray-900 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3]"
             />
+            <div className="absolute top-8 right-2 text-sm text-white-500  bg-green-500 rounded-lg px-2 py-1">
+              {currentExperience.experienceDuties.length}/50
+            </div>
           </div>
         </div>
 

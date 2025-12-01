@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const getCompanyName_1 = require("./getCompanyName");
 const transporter = nodemailer_1.default.createTransport({
     service: "gmail",
     auth: {
@@ -22,7 +23,7 @@ const transporter = nodemailer_1.default.createTransport({
     },
 });
 /// create afucntion to send email
-const emailTemplate = `
+const getEmailTemplate = (companyName) => `
   <html>
     <head>
       <style>
@@ -73,12 +74,12 @@ const emailTemplate = `
     <body>
       <div class="container">
         <div class="header">
-          <img class="logo" src="https://www.reachoutmbuya.org/wp-content/uploads/2019/06/Logoz1.png" alt="ROM E-Recruitment">
+          <img class="logo" src="https://www.reachoutmbuya.org/wp-content/uploads/2019/06/Logoz1.png" alt="${companyName} E-Recruitment">
           <h2>Email Verification</h2>
         </div>
         
         <p>Hello,{{ fullName }}</p>
-        <p>Thank you for registering with ROM E-Recruitment. To complete your registration, please use the verification code below:</p>
+        <p>Thank you for registering with ${companyName} E-Recruitment. To complete your registration, please use the verification code below:</p>
         
         <div class="otp-code">
           {{ otpCode }}
@@ -88,7 +89,7 @@ const emailTemplate = `
         <p>If you didn't request this verification code, please ignore this email or contact our support team if you have concerns.</p>
         
         <div class="footer">
-          <p>© ${new Date().getFullYear()} ROM E-Recruitment. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} ${companyName} E-Recruitment. All rights reserved.</p>
           <p>This is an automated message, please do not reply to this email.</p>
         </div>
       </div>
@@ -96,6 +97,8 @@ const emailTemplate = `
   </html>
 `;
 const sendEmail = (email, subject, otpCode, fullName) => __awaiter(void 0, void 0, void 0, function* () {
+    // Get company name from database
+    const companyName = yield (0, getCompanyName_1.getCompanyName)();
     const replaceVariables = (template, variables) => {
         let result = template;
         for (const [key, value] of Object.entries(variables)) {
@@ -105,7 +108,10 @@ const sendEmail = (email, subject, otpCode, fullName) => __awaiter(void 0, void 
         return result;
     };
     console.log(otpCode, fullName);
-    const emailHtml = replaceVariables(emailTemplate, { otpCode, fullName });
+    const emailHtml = replaceVariables(getEmailTemplate(companyName), {
+        otpCode,
+        fullName,
+    });
     const mailOptions = {
         from: "kalideveloper865@gmail.com",
         to: email,

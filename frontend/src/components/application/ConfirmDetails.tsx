@@ -3,17 +3,23 @@ import Swal from "sweetalert2";
 import { appServices } from "@/services/AppService";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 
 
 const ConfirmDetails = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const { companyId } = useAppSelector((state) => state.auth.session);
   const { applicationNo } = useAppSelector((state) => state.app.application);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isConfirmed) {
+      toast.error("Please confirm that you want to submit your application.");
+      return;
+    }
 
     const result = await Swal.fire({
       title: "Submit Application?",
@@ -100,6 +106,8 @@ const ConfirmDetails = () => {
         <input
           type="checkbox"
           id="confirm"
+          value={isConfirmed.toString()}
+          onChange={(e) => setIsConfirmed(e.target.checked)}
           required
           className="w-5 h-5 mt-0.5 text-[#0D55A3] border-gray-300 rounded focus:ring-[#0D55A3]"
         />
@@ -117,7 +125,6 @@ const ConfirmDetails = () => {
           disabled={isSubmitting}
           className="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
         >
-          Previous
         </button>
         <button
           onClick={handleSubmit}

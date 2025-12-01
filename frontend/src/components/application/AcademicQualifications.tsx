@@ -175,15 +175,27 @@ const AcademicQualifications = () => {
         educationTypeCode: currentQualification.educationType,
       };
 
-      const response = await appServices.createAcademicQualification(
-        companyId,
-        requestData
-      );
+      let response;
+
+      if (editingQualification) {
+        // Update existing qualification
+        response = await appServices.updateAcademicQualification(
+          companyId,
+          editingQualification.systemId,
+          requestData
+        );
+      } else {
+        // Create new qualification
+        response = await appServices.createAcademicQualification(
+          companyId,
+          requestData
+        );
+      }
 
       if (response) {
         // Convert dates to strings for Redux store
         const newQualification: AcademicQualification = {
-          systemId: response.SystemId,
+          systemId: response.SystemId || editingQualification?.systemId,
           educationType: currentQualification.educationType,
           educationTypeCode: currentQualification.educationType,
           programName: currentQualification.programName,
@@ -195,7 +207,7 @@ const AcademicQualifications = () => {
           certificate: currentQualification.certificate,
         };
 
-        // Update Redux store immediately
+        // Update Redux store
         if (editingQualification) {
           dispatch(
             setAcademicQualifications(
@@ -478,15 +490,21 @@ const AcademicQualifications = () => {
 
           {/* Description in full width */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              value={currentQualification.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              rows={3}
-              className="w-full text-black p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3]"
-            />
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
+              <textarea
+                value={currentQualification.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                maxLength={50}
+                rows={3}
+                className="w-full text-black p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3]"
+              />
+              <div className="absolute top-8 right-2 text-sm text-white-500  bg-green-500 rounded-lg px-2 py-1">
+                {currentQualification.description.length}/50
+              </div>
+            </div>
           </div>
         </div>
 

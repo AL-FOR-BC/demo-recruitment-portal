@@ -16,3 +16,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./UserControllers"), exports);
 __exportStar(require("./ProfileControllers"), exports);
+__exportStar(require("./SettingsControllers"), exports);

@@ -5,6 +5,7 @@ import { appServices } from "@/services/AppService";
 import type { JobPosition as IJobPosition } from "@/@types/app"; // Rename to avoid conflict
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { toast } from "react-toastify";
+import { PageSpinner } from "@/components/common/Spinner";
 
 
 // Local interfaces
@@ -294,7 +295,7 @@ const JobDetails = () => {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0D55A3]" />
+          <PageSpinner />
         </div>
       </DashboardLayout>
     );

@@ -1,9 +1,14 @@
 import { useAppSelector } from "@/store";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { apiOtp } from "@/services/AuthService";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  apiOtp,
+  apiOtpResetPassword,
+} from "@/services/AuthService";
 import { toast } from "react-toastify";
+import { useTheme } from "@/utils/hooks/useTheme";
+import { Spinner } from "@/components/common/Spinner";
 
 interface OTPFormProps {
   disableSubmit?: boolean;
@@ -17,22 +22,29 @@ interface JWTPayload {
   // add other JWT payload fields if needed
 }
 
-const OTPForm = ({ disableSubmit = false, onSuccess }: OTPFormProps) => {
+const OTPForm = ({ disableSubmit = false, onSuccess, email }: OTPFormProps) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [userEmail, setUserEmail] = useState<string>("");
   const { signature } = useAppSelector((state) => state.auth.session);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
+  const location = useLocation();
+  const isPasswordReset = location.state?.isPasswordReset;
+  const { primaryColor } = useTheme();
+  const themeColor = primaryColor || "#094BAC";
+  console.log(isPasswordReset);
   useEffect(() => {
-    if (!signature) {
+    if (!signature && !isPasswordReset) {
       navigate("/sign-in");
+    } else if (!signature && isPasswordReset) {
     } else {
       try {
         // Decode and set email when signature is available
-        const decoded = jwtDecode<JWTPayload>(signature);
-        setUserEmail(decoded.email);
+        if (signature) {
+          const decoded = jwtDecode<JWTPayload>(signature);
+          setUserEmail(decoded.email);
+        }
       } catch (error) {
         console.error("Error decoding JWT:", error);
         navigate("/sign-in");
@@ -111,17 +123,16 @@ const OTPForm = ({ disableSubmit = false, onSuccess }: OTPFormProps) => {
 
     try {
       const otpString = otp.join("");
-      const response = await apiOtp({
-        otp: otpString,
-      });
-
-      if (response.data) {
-        // Handle successful verification
-        toast.success("Account has been verified");
+      
+      if (isPasswordReset) {
+        await apiOtpResetPassword({ email, otp: otpString });
+        navigate("/reset-password", { state: { email } });
+      } else {
+        await apiOtp({ otp: otpString });
         onSuccess?.();
       }
     } catch (error: any) {
-      setError(error.response?.data?.message || "Failed to verify OTP");
+      toast.error(error.response?.data?.message || "Failed to verify OTP");
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +143,7 @@ const OTPForm = ({ disableSubmit = false, onSuccess }: OTPFormProps) => {
       <div className="text-center mb-6">
         <p className="text-gray-600">
           We have sent a verification code to <br />
-          <span className="font-medium text-gray-900">{userEmail}</span>
+          <span className="font-medium text-gray-900">{userEmail || email}</span>
         </p>
       </div>
 
@@ -152,7 +163,16 @@ const OTPForm = ({ disableSubmit = false, onSuccess }: OTPFormProps) => {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={(e) => handlePaste(e, index)}
-              className="w-12 h-12 text-center text-black text-xl font-semibold border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 focus:border-[#0D55A3]"
+              className="w-12 h-12 text-center text-black text-xl font-semibold border border-gray-200 rounded-lg focus:outline-none focus:ring-2 transition-all"
+              style={{
+                '--tw-ring-color': `${themeColor}50`,
+              } as React.CSSProperties}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = themeColor;
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '';
+              }}
             />
           ))}
         </div>
@@ -162,9 +182,27 @@ const OTPForm = ({ disableSubmit = false, onSuccess }: OTPFormProps) => {
           disabled={
             disableSubmit || isSubmitting || otp.some((digit) => !digit)
           }
-          className="w-full py-3.5 px-4 bg-[#0D55A3] hover:bg-[#0D55A3]/90 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3.5 px-4 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          style={{ 
+            backgroundColor: themeColor,
+          }}
+          onMouseEnter={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.backgroundColor = `${themeColor}E6`;
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = themeColor;
+          }}
         >
-          {isSubmitting ? "Verifying..." : "Verify Code"}
+          {isSubmitting ? (
+            <>
+              <Spinner variant="button" size="sm" />
+              <span>Verifying...</span>
+            </>
+          ) : (
+            "Verify Code"
+          )}
         </button>
       </div>
 
@@ -173,14 +211,16 @@ const OTPForm = ({ disableSubmit = false, onSuccess }: OTPFormProps) => {
           Didn't receive the code?{" "}
           <button
             type="button"
-            className="text-[#0D55A3] font-medium hover:text-[#0D55A3]/80"
+            className="font-medium hover:opacity-80 transition-colors"
+            style={{ color: themeColor }}
           >
             Resend
           </button>
         </p>
         <Link
           to="/sign-in"
-          className="text-[#0D55A3] text-sm font-medium hover:text-[#0D55A3]/80 inline-block"
+          className="text-sm font-medium hover:opacity-80 transition-colors inline-block"
+          style={{ color: themeColor }}
         >
           Back to Sign In
         </Link>

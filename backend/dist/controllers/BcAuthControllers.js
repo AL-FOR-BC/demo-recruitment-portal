@@ -15,11 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetBcConfig = exports.BCAuthToken = void 0;
 // import { prisma } from "../utils/Prismadb";
 const axios_1 = __importDefault(require("axios"));
-const prismadb_1 = __importDefault(require("../prismadb"));
+const database_1 = require("../utils/database");
 const BCAuthToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const config = yield prismadb_1.default.bc_configs.findUnique({
-            where: { id: "3" },
+        const db = (0, database_1.getDB)();
+        const config = yield db.bc_configs.findUnique({
+            where: { id: "2" },
         });
         console.log(config);
         if (!config) {
@@ -50,8 +51,9 @@ const BCAuthToken = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
 exports.BCAuthToken = BCAuthToken;
 const GetBcConfig = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const config = yield prismadb_1.default.bc_configs.findUnique({
-            where: { id: "3" },
+        const db = (0, database_1.getDB)();
+        const config = yield db.bc_configs.findUnique({
+            where: { id: "2" },
         });
         return res.json(config);
     }

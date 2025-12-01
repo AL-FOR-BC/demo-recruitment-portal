@@ -3,6 +3,8 @@ import { useAppSelector } from "@/store";
 import { useState, useRef, useEffect } from "react";
 import logo from "@/assets/logo-rom.png";
 import useAuth from "@/utils/hooks/useAuth";
+import { useTheme } from "@/utils/hooks/useTheme";
+import { useCompanyName } from "@/utils/hooks/useCompanyName";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -22,6 +24,8 @@ interface AvatarProps {
 }
 
 const UserAvatar = ({ fullName, size = "md", className = "" }: AvatarProps) => {
+  const { primaryColor } = useTheme();
+
   const getInitials = (name: string) => {
     const names = name.split(" ");
     if (names.length >= 2) {
@@ -40,7 +44,6 @@ const UserAvatar = ({ fullName, size = "md", className = "" }: AvatarProps) => {
     <div
       className={`
         rounded-full 
-        bg-[#0D55A3]
         flex 
         items-center 
         justify-center 
@@ -49,6 +52,7 @@ const UserAvatar = ({ fullName, size = "md", className = "" }: AvatarProps) => {
         ${sizeClasses[size]}
         ${className}
       `}
+      style={{ backgroundColor: primaryColor || "#094BAC" }}
     >
       {getInitials(fullName)}
     </div>
@@ -58,10 +62,14 @@ const UserAvatar = ({ fullName, size = "md", className = "" }: AvatarProps) => {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user } = useAppSelector((state) => state.auth);
   const { signOut } = useAuth();
+  const { primaryColor, logo: themeLogo } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const displayLogo = themeLogo || logo;
+  const themeColor = primaryColor || "#094BAC";
+  const companyName = useCompanyName();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -169,39 +177,35 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-24">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between h-16 sm:h-20 lg:h-24">
             <div className="flex items-center">
               {/* Logo */}
-              <Link to="/dashboard" className="flex items-center -ml-4">
-                <img src={logo} alt="ROM Logo" className="h-24 w-auto py-2" />
+              <Link
+                to="/dashboard"
+                className="flex items-center -ml-2 sm:-ml-4"
+              >
+                <img
+                  src={displayLogo}
+                  alt={`${companyName} Logo`}
+                  className="h-16 sm:h-20 lg:h-24 w-auto py-2"
+                />
               </Link>
-              {/* Hamburger Menu */}
-              <button className="ml-6 p-2 text-[#0D55A3]">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
             </div>
 
-            {/* Search Bar */}
-            <div className="flex-1 flex items-center justify-center px-2 lg:px-6">
+            {/* Search Bar - Hide on mobile */}
+            <div className="hidden md:flex flex-1 items-center justify-center px-2 lg:px-6">
               <div className="max-w-lg w-full">
                 <div className="relative">
                   <input
                     type="text"
-                    className="w-full bg-gray-100 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50"
+                    className="w-full bg-gray-100 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2"
+                    style={
+                      {
+                        "--tw-ring-color": `${themeColor}50`,
+                      } as React.CSSProperties
+                    }
                     placeholder="Search something here..."
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
@@ -224,44 +228,32 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
 
             {/* Right Navigation */}
-            <div className="flex items-center space-x-4">
-              {/* Profile Dropdown */}
+            <div className="flex items-center">
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 sm:gap-3 p-1.5 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <UserAvatar
                     fullName={user?.fullName || "User Name"}
+                    size="sm"
+                    className="sm:hidden"
+                  />
+                  <UserAvatar
+                    fullName={user?.fullName || "User Name"}
                     size="md"
-                    className="hover:bg-purple-700 transition-colors duration-200"
+                    className="hidden sm:flex"
                   />
                   <div className="text-sm text-left hidden sm:block">
-                    <p className="font-medium text-gray-700">
+                    <p className="font-medium text-gray-700 line-clamp-1">
                       {user?.fullName || "User Name"}
                     </p>
-                    {/* <p className="text-gray-500 text-xs">Super Admin</p> */}
                   </div>
-                  <svg
-                    className={`w-5 h-5 text-gray-400 transition-transform ${
-                      isProfileOpen ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown Menu - Adjust position for mobile */}
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-48 sm:w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900">
                         {user?.fullName}
@@ -347,21 +339,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </nav>
 
-      {/* Tab Navigation */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
+      {/* Tab Navigation - Make scrollable on mobile */}
+      <div className="bg-white shadow sticky top-16 sm:top-20 lg:top-24 z-20">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 overflow-x-auto">
+          <div className="flex space-x-6 sm:space-x-8 py-2 sm:py-0">
             {tabs.map((tab) => {
               const isActive = location.pathname === tab.to;
               return (
                 <Link
                   key={tab.key}
                   to={tab.to}
-                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 text-sm font-medium ${
+                  className={`flex items-center space-x-2 py-3 px-1 border-b-2 text-sm font-medium whitespace-nowrap ${
                     isActive
-                      ? "border-[#0D55A3] text-[#0D55A3]"
+                      ? "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
+                  style={
+                    isActive
+                      ? {
+                          borderBottomColor: themeColor,
+                          color: themeColor,
+                        }
+                      : undefined
+                  }
                 >
                   {tab.icon}
                   <span>{tab.label}</span>
@@ -372,8 +372,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">{children}</main>
+      {/* Main Content - Adjust padding for mobile */}
+      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-2 sm:px-4 lg:px-8">
+        {children}
+      </main>
     </div>
   );
 };

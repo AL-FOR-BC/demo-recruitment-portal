@@ -1,7 +1,7 @@
 // import { prisma } from "../utils/Prismadb";
 import axios from "axios";
 import express, { NextFunction, Request, Response } from "express";
-import prisma from "../prismadb";
+import { getDB } from "../utils/database";
 
 export const BCAuthToken = async (
   req: Request,
@@ -9,8 +9,9 @@ export const BCAuthToken = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    const config = await prisma.bc_configs.findUnique({
-      where: { id: "3" },
+    const db = getDB();
+    const config = await db.bc_configs.findUnique({
+      where: { id: "2" },
     });
     console.log(config);
 
@@ -48,8 +49,9 @@ export const GetBcConfig = async (
   next: NextFunction
 ) => {
   try {
-    const config = await prisma.bc_configs.findUnique({
-      where: { id: "3" },
+    const db = getDB();
+    const config = await db.bc_configs.findUnique({
+      where: { id: "2" },
     });
 
     return res.json(config);

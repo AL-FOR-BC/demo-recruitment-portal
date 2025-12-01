@@ -20,6 +20,19 @@ const authRoute: Routes = [
     component: lazy(() => import("@/view/auth/OTP")),
     authority: [],
   },
+  {
+    key: "forgotPassword",
+    path: "/forgot-password",
+    component: lazy(() => import("@/view/auth/ForgotPassword")),
+    authority: [],
+  },
+  {
+    key: "resetPassword",
+    path: "/reset-password",
+    component: lazy(() => import("@/view/auth/ResetPassword")),
+    authority: [],
+  },
+
   
 ];
 

@@ -6,6 +6,7 @@ import { appServices } from "@/services/AppService";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { SkillsOptions } from "@/@types/app";
 import { getSkills } from "@/store/slices/app/applicationSlice";
+import { PageSpinner } from "@/components/common/Spinner";
 
 interface SkillData {
   systemId: string;
@@ -264,7 +265,7 @@ const Skills = () => {
       <div className="overflow-x-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0D55A3]"></div>
+            <PageSpinner />
           </div>
         ) : skills.length === 0 ? (
           <div className="text-center py-10 text-gray-500">

@@ -16,16 +16,21 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const UserRoutes_1 = require("../routes/UserRoutes");
 const ProfileRoutes_1 = require("../routes/ProfileRoutes");
+const SettingsRoutes_1 = require("../routes/SettingsRoutes");
 const helpers_1 = require("../helpers");
-const prismadb_1 = __importDefault(require("../prismadb"));
+const database_1 = require("../database");
 exports.default = (app) => __awaiter(void 0, void 0, void 0, function* () {
+    // Initialize database adapter
+    yield (0, database_1.initializeDatabase)();
     app.use(express_1.default.json({ limit: "30mb" }));
     app.use(express_1.default.urlencoded({ extended: true }));
-    app.use((0, cors_1.default)());
+    // allow any origin
+    app.use((0, cors_1.default)({ origin: "*" }));
     app.use((req, res, next) => {
         console.log("Checking database connection");
-        (0, helpers_1.checkDatabaseConnection)(prismadb_1.default, res, next);
+        (0, helpers_1.checkDatabaseConnection)(res, next);
     });
     app.use("/api/auth/", UserRoutes_1.UserRoutes);
     app.use("/api/profile/", ProfileRoutes_1.ProfileRoutes);
+    app.use("/api/settings/", SettingsRoutes_1.SettingsRoutes);
 });

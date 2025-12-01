@@ -9,6 +9,20 @@ import {
 } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
 import { appServices } from "@/services/AppService";
+import { PageSpinner } from "@/components/common/Spinner";
+
+// File size constants
+const MAX_FILE_SIZE_MB = 2;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 2MB in bytes
+
+// Helper function to format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
 
 interface AttachmentProps {
   companyId: string;
@@ -19,11 +33,15 @@ interface AttachmentProps {
 }
 
 interface Attachment {
+  SystemId: string;
+  ID: number;
+  TableID: number;
+  DocumentType: string;
+  No: string;
   FileName: string;
   FileExtension: string;
-  FileContentsBase64: string;
-  SystemId: string;
   fileContentType: string;
+  FileContentsBase64: string;
 }
 
 const Attachments = ({
@@ -41,15 +59,41 @@ const Attachments = ({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setNewFiles(Array.from(e.target.files));
+      const selectedFiles = Array.from(e.target.files);
+      const invalidFiles = selectedFiles.filter(
+        (file) => file.size > MAX_FILE_SIZE_BYTES
+      );
+
+      if (invalidFiles.length > 0) {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        const fileDetails = invalidFiles
+          .map((file) => `${file.name} (${formatFileSize(file.size)})`)
+          .join(", ");
+        toast.error(
+          `The following file(s) exceed the ${MAX_FILE_SIZE_MB}MB limit: ${fileDetails}`,
+          { duration: 6000 }
+        );
+        return;
+      }
+
+      setNewFiles(selectedFiles);
     }
   };
 
   const handleDownload = (attachment: Attachment) => {
-    const link = document.createElement("a");
-    link.href = `data:${attachment.fileContentType};base64,${attachment.FileContentsBase64}`;
-    link.download = `${attachment.FileName}.${attachment.FileExtension}`;
-    link.click();
+    try {
+      const link = document.createElement("a");
+      link.href = `data:${attachment.fileContentType};base64,${attachment.FileContentsBase64}`;
+      link.download = `${attachment.FileName}.${attachment.FileExtension}`;
+      document.body.appendChild(link); // Needed for Firefox
+      link.click();
+      document.body.removeChild(link); // Clean up
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download file");
+    }
   };
 
   const fetchAttachments = async () => {
@@ -57,8 +101,18 @@ const Attachments = ({
       setIsLoading(true);
       const filterQuery = `$filter=No eq '${docNo}' and TableID eq ${tableId}`;
       const response = await appServices.getAttachments(companyId, filterQuery);
-      if (response && response.value) {
-        setAttachments(response.value);
+
+      // Handle both direct array response and response with value property
+      const attachmentsData = Array.isArray(response)
+        ? response
+        : response?.value;
+
+      if (attachmentsData && Array.isArray(attachmentsData)) {
+        setAttachments(attachmentsData);
+        console.log("Attachments loaded:", attachmentsData);
+      } else {
+        console.error("Unexpected response format:", response);
+        toast.error("Invalid attachment data format");
       }
     } catch (error) {
       console.error("Error fetching attachments:", error);
@@ -188,12 +242,16 @@ const Attachments = ({
                       ref={fileInputRef}
                       onChange={handleFileSelect}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50"
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                     />
+                    <p className="mt-1 text-sm text-gray-500">
+                      Maximum file size: {MAX_FILE_SIZE_MB}MB
+                    </p>
                   </div>
                   <button
                     onClick={handleSave}
                     disabled={newFiles.length === 0}
-                    className="px-4 py-2 bg-[#0D55A3] text-white rounded-lg hover:bg-[#0D55A3]/90 disabled:opacity-50"
+                    className="px-2 py-2 h-12 bg-[#0D55A3] text-white rounded-lg hover:bg-[#0D55A3]/90 disabled:opacity-50"
                   >
                     Save Attachment
                   </button>
@@ -202,7 +260,7 @@ const Attachments = ({
 
               {isLoading ? (
                 <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0D55A3]"></div>
+                  <PageSpinner className="py-8" />
                 </div>
               ) : attachments.length === 0 && newFiles.length === 0 ? (
                 <div className="text-center py-8">

@@ -1,4 +1,5 @@
 import nodemailer, { Transporter } from "nodemailer";
+import { getCompanyName } from "./getCompanyName";
 
 const transporter: Transporter = nodemailer.createTransport({
   service: "gmail",
@@ -9,7 +10,7 @@ const transporter: Transporter = nodemailer.createTransport({
 });
 
 /// create afucntion to send email
-const emailTemplate = `
+const getEmailTemplate = (companyName: string) => `
   <html>
     <head>
       <style>
@@ -60,12 +61,12 @@ const emailTemplate = `
     <body>
       <div class="container">
         <div class="header">
-          <img class="logo" src="https://www.reachoutmbuya.org/wp-content/uploads/2019/06/Logoz1.png" alt="ROM E-Recruitment">
+          <img class="logo" src="https://www.reachoutmbuya.org/wp-content/uploads/2019/06/Logoz1.png" alt="${companyName} E-Recruitment">
           <h2>Email Verification</h2>
         </div>
         
         <p>Hello,{{ fullName }}</p>
-        <p>Thank you for registering with ROM E-Recruitment. To complete your registration, please use the verification code below:</p>
+        <p>Thank you for registering with ${companyName} E-Recruitment. To complete your registration, please use the verification code below:</p>
         
         <div class="otp-code">
           {{ otpCode }}
@@ -75,7 +76,7 @@ const emailTemplate = `
         <p>If you didn't request this verification code, please ignore this email or contact our support team if you have concerns.</p>
         
         <div class="footer">
-          <p>© ${new Date().getFullYear()} ROM E-Recruitment. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} ${companyName} E-Recruitment. All rights reserved.</p>
           <p>This is an automated message, please do not reply to this email.</p>
         </div>
       </div>
@@ -88,6 +89,9 @@ export const sendEmail = async (
   otpCode: string,
   fullName: string
 ) => {
+  // Get company name from database
+  const companyName = await getCompanyName();
+
   const replaceVariables = (
     template: string,
     variables: Record<string, string>
@@ -100,7 +104,10 @@ export const sendEmail = async (
     return result;
   };
   console.log(otpCode, fullName);
-  const emailHtml = replaceVariables(emailTemplate, { otpCode, fullName });
+  const emailHtml = replaceVariables(getEmailTemplate(companyName), {
+    otpCode,
+    fullName,
+  });
 
   const mailOptions = {
     from: "kalideveloper865@gmail.com",

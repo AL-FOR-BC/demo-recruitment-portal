@@ -1,6 +1,5 @@
 import {
   BcToken,
-  ForgotPassword,
   Otp,
   SignInCredential,
   SignInResponse,
@@ -33,6 +32,13 @@ export async function apiOtp(data: Otp) {
   });
 }
 
+export async function apiOtpResetPassword(data: Otp) {
+  return ApiService.fetchData<any>({
+    url: "/auth/verify-reset-password",
+    method: "post",
+    data,
+  });
+}
 export async function apiSignOut() {
   return ApiService.fetchData({
     url: "/sign-out",
@@ -49,9 +55,17 @@ export async function apiBcToken() {
 }
 
 
-export async function apiForgotPassword(data: ForgotPassword) {
-  return ApiService.fetchData({
-    url: "/forgot-password",
+export async function apiForgotPassword(data: { email: string }) {
+  return ApiService.fetchData<any>({
+    url: "/auth/forgot-password",
+    method: "post",
+    data,
+  });
+}
+
+export async function apiResetPassword(data: { email: string; newPassword: string }) {
+  return ApiService.fetchData<any>({
+    url: "/auth/reset-password",
     method: "post",
     data,
   });

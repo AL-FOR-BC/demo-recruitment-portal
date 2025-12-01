@@ -8,23 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResendOtp = exports.UserSignIn = exports.UserVerify = exports.UserSignUp = void 0;
+exports.VefiyOtpResetPassword = exports.ResetPassword = exports.ForgotPassword = exports.ResendOtp = exports.UserSignIn = exports.UserVerify = exports.UserSignUp = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const dto_1 = require("../dto");
 const SendEmail_1 = require("../utils/SendEmail");
 const PasswordUtility_1 = require("../utils/PasswordUtility");
 const NotificationUtility_1 = require("../utils/NotificationUtility");
-const prismadb_1 = __importDefault(require("../prismadb"));
-const client_1 = require("@prisma/client");
-// import { isEmptyObject } from "../helpers";
-const isEmptyObject = (obj) => {
-    return Object.entries(obj).length === 0;
-};
+const database_1 = require("../utils/database");
+const getCompanyName_1 = require("../utils/getCompanyName");
 const UserSignUp = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log(req.body);
@@ -43,12 +36,14 @@ const UserSignUp = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const otp_secret = otp.toString();
         const encryptedOtp = yield (0, NotificationUtility_1.EncryptOtp)(otp_secret, salt);
         const otp_expiry = expiry;
-        const subject = "ROM E-Recruitment OTP";
-        if (yield prismadb_1.default.users.findUnique({ where: { email } })) {
+        const companyName = yield (0, getCompanyName_1.getCompanyName)();
+        const subject = `${companyName} E-Recruitment OTP`;
+        const db = (0, database_1.getDB)();
+        if (yield db.recruitment_user.findUnique({ where: { email } })) {
             res.status(400).json({ message: "User already exists" });
             return;
         }
-        const user = yield prismadb_1.default.users.create({
+        const user = yield db.recruitment_user.create({
             data: {
                 email,
                 fullname: fullName,
@@ -79,17 +74,38 @@ const UserSignUp = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         }
     }
     catch (e) {
-        if (e instanceof client_1.Prisma.PrismaClientKnownRequestError) {
-            if (e.code === "P2002") {
-                res.status(400).json({
-                    message: "Email already exists",
+        console.error("UserSignUp error:", e);
+        console.error("Error details:", {
+            message: e.message,
+            code: e.code,
+            name: e.name,
+            stack: e.stack,
+        });
+        // Handle duplicate key error (MongoDB) or Prisma unique constraint error
+        if (e.code === "P2002" || e.code === 11000) {
+            res.status(400).json({
+                message: "Email already exists",
+            });
+            return;
+        }
+        // Handle Mongoose validation errors
+        if (e.name === "ValidationError") {
+            const validationErrors = {};
+            if (e.errors) {
+                Object.keys(e.errors).forEach((key) => {
+                    validationErrors[key] = e.errors[key].message;
                 });
-                return;
             }
+            res.status(400).json({
+                message: "Validation error",
+                errors: validationErrors,
+            });
+            return;
         }
         res.status(500).json({
             message: "Something went wrong",
-            error: e,
+            error: e.message || "Unknown error",
+            errorName: e.name || "Error",
         });
         return;
     }
@@ -105,7 +121,8 @@ const UserVerify = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         return;
     }
     try {
-        const profile = yield prismadb_1.default.users.findUnique({
+        const db = (0, database_1.getDB)();
+        const profile = yield db.recruitment_user.findUnique({
             where: {
                 email: user.email, // Now we ensure email is defined
             },
@@ -118,7 +135,7 @@ const UserVerify = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         if (profile.otp_secret === otpValidation &&
             profile.otp_expiry &&
             profile.otp_expiry >= new Date()) {
-            const updatedUserResponse = yield prismadb_1.default.users.update({
+            const updatedUserResponse = yield db.recruitment_user.update({
                 where: {
                     email: user.email,
                 },
@@ -154,7 +171,8 @@ const UserSignIn = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     const { email, password } = req.body;
     // console.log(req.body);
     try {
-        const profile = yield prismadb_1.default.users.findUnique({
+        const db = (0, database_1.getDB)();
+        const profile = yield db.recruitment_user.findUnique({
             where: {
                 email,
             },
@@ -167,7 +185,7 @@ const UserSignIn = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
                     const otp_secret = otp.toString();
                     const encryptedOtp = yield (0, NotificationUtility_1.EncryptOtp)(otp_secret, profile.salt);
                     const otp_expiry = expiry;
-                    const user = yield prismadb_1.default.users.update({
+                    const user = yield db.recruitment_user.update({
                         where: {
                             email: email,
                         },
@@ -190,8 +208,8 @@ const UserSignIn = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
                     });
                     return;
                 }
-                const config = yield prismadb_1.default.bc_configs.findUnique({
-                    where: { id: "3" },
+                const config = yield db.bc_configs.findUnique({
+                    where: { id: "1" },
                 });
                 if (config) {
                     const signature = yield (0, PasswordUtility_1.GenerateSignature)({
@@ -212,17 +230,17 @@ const UserSignIn = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
                 return;
             }
             else {
-                res.status(401).json({ message: "Invalid Password" });
+                res.status(403).json({ message: "Invalid Password" });
                 return;
             }
         }
         else {
-            res.status(401).json({ message: "User not found" });
+            res.status(403).json({ message: "User not found" });
             return;
         }
     }
     catch (error) {
-        res.status(401).json({ message: "User not found" });
+        res.status(403).json({ message: "User not found" });
         return;
     }
 });
@@ -230,8 +248,9 @@ exports.UserSignIn = UserSignIn;
 const ResendOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = req.body;
+        const db = (0, database_1.getDB)();
         if (email) {
-            const user = yield prismadb_1.default.users.findUnique({
+            const user = yield db.recruitment_user.findUnique({
                 where: {
                     email,
                 },
@@ -241,7 +260,7 @@ const ResendOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 const otp_secret = otp.toString();
                 const encryptedOtp = yield (0, NotificationUtility_1.EncryptOtp)(otp_secret, user.salt);
                 const otp_expiry = expiry;
-                const userV1 = yield prismadb_1.default.users.update({
+                const userV1 = yield db.recruitment_user.update({
                     where: {
                         email: email,
                     },
@@ -250,7 +269,8 @@ const ResendOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                         otp_expiry: otp_expiry,
                     },
                 });
-                yield (0, SendEmail_1.sendEmail)(email, userV1.fullname, "ROM E-Recruitment OTP", otp.toString());
+                const companyName = yield (0, getCompanyName_1.getCompanyName)();
+                yield (0, SendEmail_1.sendEmail)(email, userV1.fullname, `${companyName} E-Recruitment OTP`, otp.toString());
                 res.status(200).json({ message: "OTP sent" });
                 return;
             }
@@ -262,3 +282,136 @@ const ResendOtp = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.ResendOtp = ResendOtp;
+const ForgotPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const db = (0, database_1.getDB)();
+        const { email } = req.body;
+        const user = yield db.recruitment_user.findUnique({
+            where: { email },
+        });
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+        // Generate reset token
+        const { otp, expiry } = (0, NotificationUtility_1.GenerateOtp)();
+        const otp_secret = otp.toString();
+        const encryptedOtp = yield (0, NotificationUtility_1.EncryptOtp)(otp_secret, user.salt);
+        const otp_expiry = expiry;
+        const companyName = yield (0, getCompanyName_1.getCompanyName)();
+        const subject = `${companyName} E-Recruitment Password Reset OTP`;
+        yield db.recruitment_user.update({
+            where: { email },
+            data: {
+                otp_secret: encryptedOtp,
+                otp_expiry: otp_expiry,
+            },
+        });
+        yield (0, SendEmail_1.sendEmail)(email, subject, otp.toString(), user.fullname);
+        const signature = yield (0, PasswordUtility_1.GenerateSignature)({
+            id: user.id.toString(),
+            email: user.email,
+            verified: user.verified,
+        });
+        res.status(200).json({
+            signature,
+            email: user.email,
+            message: "Password reset instructions sent to your email",
+        });
+    }
+    catch (error) {
+        console.error("Forgot password error:", error);
+        res.status(500).json({
+            message: "Failed to process password reset request",
+        });
+    }
+});
+exports.ForgotPassword = ForgotPassword;
+const ResetPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const db = (0, database_1.getDB)();
+        const { email, newPassword } = req.body;
+        const user = yield db.recruitment_user.findUnique({
+            where: { email },
+        });
+        if (!user) {
+            res.status(400).json({
+                message: "User not found",
+            });
+            return;
+        }
+        // Generate new password hash
+        const salt = yield (0, PasswordUtility_1.GenerateSalt)();
+        const hashedPassword = yield (0, PasswordUtility_1.GeneratePassword)(newPassword, salt);
+        // Update user password and clear reset token
+        yield db.recruitment_user.updateById({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                salt: salt,
+            },
+        });
+        res.status(200).json({
+            message: "Password has been reset successfully",
+        });
+    }
+    catch (error) {
+        console.error("Reset password error:", error);
+        res.status(500).json({
+            message: "Failed to reset password",
+        });
+    }
+});
+exports.ResetPassword = ResetPassword;
+const VefiyOtpResetPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { otp } = req.body;
+    const { email } = req.body;
+    console.log("OTP:", otp);
+    console.log("User:", email);
+    try {
+        const db = (0, database_1.getDB)();
+        const profile = yield db.recruitment_user.findUnique({
+            where: {
+                email: email, // Now we ensure email is defined
+            },
+        });
+        if (!profile) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+        const otpValidation = yield (0, NotificationUtility_1.EncryptOtp)(otp.toString(), profile.salt);
+        if (profile.otp_secret === otpValidation &&
+            profile.otp_expiry &&
+            profile.otp_expiry >= new Date()) {
+            const updatedUserResponse = yield db.recruitment_user.update({
+                where: {
+                    email: email,
+                },
+                data: {
+                    verified: true,
+                },
+            });
+            const signature = yield (0, PasswordUtility_1.GenerateSignature)({
+                id: updatedUserResponse.id.toString(),
+                email: updatedUserResponse.email,
+                verified: updatedUserResponse.verified,
+            });
+            res.status(200).json({
+                signature,
+                email: updatedUserResponse.email,
+                verified: updatedUserResponse.verified,
+            });
+            return;
+        }
+        else {
+            res.status(400).json({ message: "Invalid OTP" });
+            return;
+        }
+    }
+    catch (error) {
+        console.error("Verification error:", error);
+        res.status(500).json({ message: "Error verifying user", error });
+        return;
+    }
+});
+exports.VefiyOtpResetPassword = VefiyOtpResetPassword;

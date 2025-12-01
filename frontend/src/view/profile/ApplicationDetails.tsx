@@ -7,7 +7,7 @@ import WorkExperience from "@/components/application/WorkExperience";
 import RefereesAndAttachments from "@/components/application/RefereesAndAttachments";
 import ConfirmDetails from "@/components/application/ConfirmDetails";
 import Certificates from "@/components/application/Certificates";
-
+// import { useAppSelector } from "@/store";
 
 type WizardStep = {
   id: number;
@@ -15,11 +15,20 @@ type WizardStep = {
   icon: JSX.Element;
 };
 
-
-
 const ApplicationDetails = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  // const { data: profile } = useAppSelector((state) => state.app.profile);
+  // const { applications } = useAppSelector((state) => state.app.application);
 
+  // const existingApplication = applications.find(
+  //   (app) =>
+  //     app.RecruitmentProjectNo === job.RecrProjNo &&
+  //     app.EMail === profile?.email
+  // );
+
+  // const hasApplied = existingApplication?.ApplicationSubmitted === true;
+  // const hasUnsubmittedApplication =
+  //   existingApplication && !existingApplication.ApplicationSubmitted;
 
   const steps: WizardStep[] = [
     {
@@ -27,7 +36,7 @@ const ApplicationDetails = () => {
       title: "Biodata",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -46,7 +55,7 @@ const ApplicationDetails = () => {
       title: "Academic",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -71,7 +80,7 @@ const ApplicationDetails = () => {
       title: "Skills",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -90,7 +99,7 @@ const ApplicationDetails = () => {
       title: "Certificates",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -109,7 +118,7 @@ const ApplicationDetails = () => {
       title: "Experience",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -128,7 +137,7 @@ const ApplicationDetails = () => {
       title: "References",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -147,7 +156,7 @@ const ApplicationDetails = () => {
       title: "Review",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-4 h-4 sm:w-6 sm:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -163,12 +172,33 @@ const ApplicationDetails = () => {
     },
   ];
 
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <BiodataForm />;
+      case 2:
+        return <AcademicQualifications />;
+      case 3:
+        return <Skills />;
+      case 4:
+        return <Certificates />;
+      case 5:
+        return <WorkExperience />;
+      case 6:
+        return <RefereesAndAttachments />;
+      case 7:
+        return <ConfirmDetails />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="space-y-8">
+      <div className="max-w-5xl mx-auto py-4 sm:py-8 px-2 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+        <div className="space-y-4 sm:space-y-8">
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between w-full col-span-7 mb-6">
+            <div className="hidden sm:flex items-center justify-between w-full mb-6">
               {steps.map((step, index) => (
                 <div
                   key={step.id}
@@ -177,7 +207,7 @@ const ApplicationDetails = () => {
                   }`}
                 >
                   <div
-                    className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                    className={`relative z-10 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all duration-300 ${
                       step.id === currentStep
                         ? "border-[#0D55A3] bg-[#0D55A3] text-white"
                         : step.id < currentStep
@@ -187,7 +217,7 @@ const ApplicationDetails = () => {
                   >
                     {step.id < currentStep ? (
                       <svg
-                        className="w-6 h-6"
+                        className="w-4 h-4 sm:w-6 sm:h-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -205,7 +235,7 @@ const ApplicationDetails = () => {
                   </div>
                   {index < steps.length - 1 && (
                     <div
-                      className={`flex-1 h-0.5 mx-4 ${
+                      className={`flex-1 h-0.5 mx-2 sm:mx-4 transition-all duration-300 ${
                         step.id < currentStep ? "bg-green-500" : "bg-gray-300"
                       }`}
                     />
@@ -213,11 +243,18 @@ const ApplicationDetails = () => {
                 </div>
               ))}
             </div>
-            <div className="flex flex-row space-x-24">
+
+            <div className="sm:hidden flex items-center justify-center">
+              <span className="text-sm text-gray-500">
+                Step {currentStep} of {steps.length}
+              </span>
+            </div>
+
+            <div className="hidden sm:flex justify-between px-2">
               {steps.map((step) => (
                 <div
                   key={`title-${step.id}`}
-                  className={`text-center  text-sm font-medium ${
+                  className={`text-center text-xs sm:text-sm font-medium transition-colors duration-300 ${
                     step.id === currentStep
                       ? "text-[#0D55A3]"
                       : step.id < currentStep
@@ -231,57 +268,30 @@ const ApplicationDetails = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            {currentStep === 1 && (
-              <BiodataForm
-                
-              />
-            )}
-            {currentStep === 2 && (
-              <AcademicQualifications
-              />
-            )}
-            {currentStep === 3 && (
-              <Skills
-              
-              />
-            )}
-            {currentStep === 4 && (
-              <Certificates
-                
-              />
-            )}
-            {currentStep === 5 && (
-              <WorkExperience
-               
-              />
-            )}
-            {currentStep === 6 && (
-              <RefereesAndAttachments
-               
-              />
-            )}
-            {currentStep === 7 && (
-              <ConfirmDetails
-               
-              />
-            )}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6">
+            {renderStep()}
 
-            <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 mt-6 sm:mt-8">
               <button
-                type="button"
                 onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
+                className={`px-4 sm:px-6 py-2 sm:py-2.5 text-[#0D55A3] border border-[#0D55A3] rounded-lg hover:bg-[#0D55A3]/10 transition-colors duration-200 ${
+                  currentStep === 1 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={currentStep === 1}
-                className="px-6 py-2 text-[#0D55A3] border border-[#0D55A3] rounded-lg hover:bg-[#0D55A3]/10"
               >
                 Previous
               </button>
-              <button
-                onClick={() => setCurrentStep((prev) => Math.min(7, prev + 1))}
-                className="px-6 py-2.5 text-white bg-[#0D55A3] rounded-lg hover:bg-[#0D55A3]/90 focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 transition-all duration-200"
-              >
-                {currentStep === 7 ? "Submit Application" : "Next"}
-              </button>
+
+              {currentStep < 7 && (
+                <button
+                  onClick={() =>
+                    setCurrentStep((prev) => Math.min(7, prev + 1))
+                  }
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 text-white bg-[#0D55A3] rounded-lg hover:bg-[#0D55A3]/90 focus:outline-none focus:ring-2 focus:ring-[#0D55A3]/50 transition-all duration-200"
+                >
+                  Next
+                </button>
+              )}
             </div>
           </div>
         </div>

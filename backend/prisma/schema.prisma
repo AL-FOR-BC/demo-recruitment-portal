@@ -48,6 +48,8 @@ model users {
   verified        Boolean
   profile_created Boolean   @default(false)
   salt           String    @db.VarChar(255)
+  resetToken       String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
 }
 
 
