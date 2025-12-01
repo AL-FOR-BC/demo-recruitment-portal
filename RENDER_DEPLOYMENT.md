@@ -47,7 +47,20 @@ Make sure to add all required environment variables in Render's dashboard:
 
 ### Important Notes
 - The frontend is configured with `base: '/recruitment-app/'` in `vite.config.ts`
+- A `_redirects` file has been created in `frontend/public/` to handle SPA routing
+- The `_redirects` file ensures all routes under `/recruitment-app/*` are served by `index.html`
 - Make sure your Render static site URL matches this base path, or update the base path in `vite.config.ts` to match your deployment URL
+
+### Redirect Configuration
+The `_redirects` file in `frontend/public/` contains:
+```
+/recruitment-app/*    /recruitment-app/index.html   200
+/    /recruitment-app/   301
+```
+
+This ensures:
+- All routes under `/recruitment-app/` (like `/recruitment-app/dashboard`) are handled by React Router
+- Root path redirects to `/recruitment-app/` for better UX
 
 ---
 
@@ -86,6 +99,10 @@ Make sure to add all required environment variables in Render's dashboard:
 
 ### Frontend Issues
 - If routes don't work, check the `base` path in `vite.config.ts`
+- Ensure the `_redirects` file is in `frontend/public/` (it will be copied to `dist/` during build)
+- If Render doesn't support `_redirects`, configure redirects in Render dashboard:
+  - Go to your Static Site settings
+  - Add custom redirect: `/recruitment-app/*` → `/recruitment-app/index.html` (200 status)
 - Ensure API URLs in frontend config point to the deployed backend URL
 - Check browser console for CORS errors
 

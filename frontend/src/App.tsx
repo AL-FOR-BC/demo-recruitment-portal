@@ -82,7 +82,7 @@ function App() {
     <ErrorBoundary>
       <Provider store={store}>
         <MsalProvider instance={pca}>
-          <BrowserRouter basename="/recruitment-app">
+          <BrowserRouter basename="/">
             <Theme>
               <Layout />
             </Theme>
