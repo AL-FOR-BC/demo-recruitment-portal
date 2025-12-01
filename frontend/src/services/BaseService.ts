@@ -13,7 +13,8 @@ const BaseService = axios.create({
   timeout: 60000,
   baseURL:
     environment === "development"
-      ? "http://localhost:8001/api"
+      ? // ? "http://localhost:8001/api"
+        "https://demo-recruitment-portal-backend.onrender.com/api"
       : appConfig.apiPrefix,
 });
 
