@@ -1,0 +1,6 @@
+# Serve static assets normally
+/assets/*    /assets/:splat    200
+/favicon.ico    /favicon.ico    200
+
+# Handle SPA routes - only for non-file requests
+/*    /index.html    200
