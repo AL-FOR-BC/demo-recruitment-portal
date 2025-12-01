@@ -103,12 +103,14 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           value={fullName}
           onChange={(e) => setfullName(e.target.value)}
           placeholder="John Doe"
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
+          className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
             fieldErrors.fullName ? "border-red-500" : "border-gray-200"
           }`}
-          style={{
-            '--tw-ring-color': `${themeColor}50`,
-          } as React.CSSProperties}
+          style={
+            {
+              "--tw-ring-color": `${themeColor}50`,
+            } as React.CSSProperties
+          }
           onFocus={(e) => {
             if (!fieldErrors.fullName) {
               e.currentTarget.style.borderColor = themeColor;
@@ -116,7 +118,7 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           }}
           onBlur={(e) => {
             if (!fieldErrors.fullName) {
-              e.currentTarget.style.borderColor = '';
+              e.currentTarget.style.borderColor = "";
             }
           }}
           required
@@ -135,12 +137,14 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="john.doe@example.com"
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
+          className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
             fieldErrors.email ? "border-red-500" : "border-gray-200"
           }`}
-          style={{
-            '--tw-ring-color': `${themeColor}50`,
-          } as React.CSSProperties}
+          style={
+            {
+              "--tw-ring-color": `${themeColor}50`,
+            } as React.CSSProperties
+          }
           onFocus={(e) => {
             if (!fieldErrors.email) {
               e.currentTarget.style.borderColor = themeColor;
@@ -148,7 +152,7 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           }}
           onBlur={(e) => {
             if (!fieldErrors.email) {
-              e.currentTarget.style.borderColor = '';
+              e.currentTarget.style.borderColor = "";
             }
           }}
           required
@@ -168,15 +172,17 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all"
-            style={{
-              '--tw-ring-color': `${themeColor}50`,
-            } as React.CSSProperties}
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all"
+            style={
+              {
+                "--tw-ring-color": `${themeColor}50`,
+              } as React.CSSProperties
+            }
             onFocus={(e) => {
               e.currentTarget.style.borderColor = themeColor;
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = '';
+              e.currentTarget.style.borderColor = "";
             }}
             required
           />
@@ -200,12 +206,14 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••"
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
+            className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all ${
               passwordError ? "border-red-500" : "border-gray-200"
             }`}
-            style={{
-              '--tw-ring-color': `${themeColor}50`,
-            } as React.CSSProperties}
+            style={
+              {
+                "--tw-ring-color": `${themeColor}50`,
+              } as React.CSSProperties
+            }
             onFocus={(e) => {
               if (!passwordError) {
                 e.currentTarget.style.borderColor = themeColor;
@@ -213,7 +221,7 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
             }}
             onBlur={(e) => {
               if (!passwordError) {
-                e.currentTarget.style.borderColor = '';
+                e.currentTarget.style.borderColor = "";
               }
             }}
             required
@@ -240,19 +248,29 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
           type="checkbox"
           id="terms"
           className="w-4 h-4 border-gray-300 rounded focus:ring-2"
-          style={{
-            accentColor: themeColor,
-            '--tw-ring-color': themeColor,
-          } as React.CSSProperties}
+          style={
+            {
+              accentColor: themeColor,
+              "--tw-ring-color": themeColor,
+            } as React.CSSProperties
+          }
           required
         />
         <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
           I agree to the{" "}
-          <a href="/terms" className="hover:opacity-80 transition-colors" style={{ color: themeColor }}>
+          <a
+            href="/terms"
+            className="hover:opacity-80 transition-colors"
+            style={{ color: themeColor }}
+          >
             Terms of Service
           </a>{" "}
           and{" "}
-          <a href="/privacy" className="hover:opacity-80 transition-colors" style={{ color: themeColor }}>
+          <a
+            href="/privacy"
+            className="hover:opacity-80 transition-colors"
+            style={{ color: themeColor }}
+          >
             Privacy Policy
           </a>
         </label>
@@ -262,7 +280,7 @@ const SignUpForm = ({ disableSubmit = false }: SignUpFormProps) => {
         type="submit"
         disabled={disableSubmit}
         className="w-full py-3.5 px-4 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ 
+        style={{
           backgroundColor: themeColor,
         }}
         onMouseEnter={(e) => {

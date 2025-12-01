@@ -61,7 +61,7 @@ const ForgotPasswordForm = () => {
         <Link
           to="/sign-in"
           className="block w-full py-3 px-4 text-center border rounded-lg hover:opacity-90 transition-all"
-          style={{ 
+          style={{
             color: themeColor,
             borderColor: themeColor,
           }}
@@ -69,7 +69,7 @@ const ForgotPasswordForm = () => {
             e.currentTarget.style.backgroundColor = `${themeColor}0D`;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.backgroundColor = "transparent";
           }}
         >
           Back to Sign In
@@ -103,15 +103,17 @@ const ForgotPasswordForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all"
-                  style={{
-                    '--tw-ring-color': `${themeColor}50`,
-                  } as React.CSSProperties}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 text-gray-600 transition-all"
+                  style={
+                    {
+                      "--tw-ring-color": `${themeColor}50`,
+                    } as React.CSSProperties
+                  }
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = themeColor;
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '';
+                    e.currentTarget.style.borderColor = "";
                   }}
                   required
                 />
@@ -123,7 +125,7 @@ const ForgotPasswordForm = () => {
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-3.5 px-4 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ 
+                style={{
                   backgroundColor: themeColor,
                 }}
                 onMouseEnter={(e) => {
