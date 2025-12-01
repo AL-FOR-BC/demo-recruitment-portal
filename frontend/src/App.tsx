@@ -42,8 +42,8 @@ function App() {
     auth: {
       clientId: config.clientId,
       authority: config.authority,
-      redirectUri: window.location.origin + "/recruitment-app/",
-      postLogoutRedirectUri: window.location.origin + "/recruitment-app/",
+      redirectUri: window.location.origin + "/",
+      postLogoutRedirectUri: window.location.origin + "/",
       navigateToLoginRequestUrl: true,
     },
     cache: {
