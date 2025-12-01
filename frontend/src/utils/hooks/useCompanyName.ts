@@ -6,10 +6,11 @@ import { useAppSelector } from "@/store";
  */
 export const useCompanyName = (): string => {
   const companyName = useAppSelector((state) => {
-    // Safely access settings with fallback
+    // Safely access settings with fallback - check both paths
     try {
+      // Try app.settings first (since settings is under app state)
       const settings = state.app?.settings;
-      if (settings && settings.companyName) {
+      if (settings?.companyName) {
         return settings.companyName;
       }
     } catch (error) {

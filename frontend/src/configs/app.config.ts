@@ -11,10 +11,10 @@ export type AppConfig = {
 const appConfig: AppConfig = {
   apiPrefix: "https://recruitmentbackend.reachoutmbuya.org/api",
   // apiPrefix: "/api-recruitment",
-  apiBcPreix: "https://api.businesscentral.dynamics.com/v2.0/24528e89-fa53-4fc5-9847-429bb50802ff/ROMProduction/",
+  // apiBcPreix: "https://api.businesscentral.dynamics.com/v2.0/24528e89-fa53-4fc5-9847-429bb50802ff/ROMProduction/",
   // apiBcPreix:
     // "https://api.businesscentral.dynamics.com/v2.0/24528e89-fa53-4fc5-9847-429bb50802ff/ROMProductionCopy1/",
-  // apiBcPreix:   "https://api.businesscentral.dynamics.com/v2.0/df78e20f-3ca1-4018-9157-8bedb2673da2/HRPSandbox4Developments/",
+  apiBcPreix:   "https://api.businesscentral.dynamics.com/v2.0/df78e20f-3ca1-4018-9157-8bedb2673da2/HRPSandbox4Developments/",
   authenticatedEntryPath: "/dashboard",
   unAuthenticatedEntryPath: "/sign-in",
   tourPath: "/app/account/kyc-form",

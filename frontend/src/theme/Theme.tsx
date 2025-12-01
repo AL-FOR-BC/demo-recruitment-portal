@@ -30,7 +30,7 @@ function Theme(props: CommonProps) {
     // Use defaults if settings access fails
   }
 
-  // Fetch settings when component mounts - don't block rendering if it fails
+  // Fetch settings immediately - don't block rendering if it fails
   useEffect(() => {
     const fetchSettingsAsync = async () => {
       try {
@@ -41,6 +41,7 @@ function Theme(props: CommonProps) {
       }
     };
 
+    // Fetch settings immediately on mount
     fetchSettingsAsync();
   }, [dispatch]);
 

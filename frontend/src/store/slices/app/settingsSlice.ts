@@ -21,7 +21,12 @@ const initialState: SettingsState = {
 
 // Fetch settings from API
 export const fetchSettings = createAsyncThunk<
-  { companyLogo: string | null; themeColor: string; companyName: string | null; help: string | null },
+  {
+    companyLogo: string | null;
+    themeColor: string;
+    companyName: string | null;
+    help: string | null;
+  },
   string | undefined,
   { rejectValue: string }
 >("settings/fetchSettings", async (settingsId, { rejectWithValue }) => {
@@ -33,7 +38,8 @@ export const fetchSettings = createAsyncThunk<
       return {
         companyLogo: response.data.companyLogo || null,
         themeColor: response.data.themeColor || "#094BAC",
-        companyName: response.data.companyName || "ROM",
+        // Preserve the companyName value from API, use null if not provided
+        companyName: response.data.companyName ?? null,
         help: response.data.help || null,
       };
     }
@@ -42,7 +48,9 @@ export const fetchSettings = createAsyncThunk<
     console.error("Settings fetch error:", error);
     // Don't crash - just return defaults
     return rejectWithValue(
-      error.response?.data?.message || error.message || "Failed to fetch settings"
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch settings"
     );
   }
 });
@@ -53,7 +61,12 @@ const settingsSlice = createSlice({
   reducers: {
     setSettings: (
       state,
-      action: PayloadAction<{ companyLogo: string | null; themeColor: string; companyName: string | null; help: string | null }>
+      action: PayloadAction<{
+        companyLogo: string | null;
+        themeColor: string;
+        companyName: string | null;
+        help: string | null;
+      }>
     ) => {
       state.companyLogo = action.payload.companyLogo;
       state.themeColor = action.payload.themeColor;
@@ -86,7 +99,8 @@ const settingsSlice = createSlice({
         state.loading = false;
         state.companyLogo = action.payload.companyLogo;
         state.themeColor = action.payload.themeColor;
-        state.companyName = action.payload.companyName || "ROM";
+        // Only use fallback if companyName is null or undefined, not if it's an empty string
+        state.companyName = action.payload.companyName ?? "ROM";
         state.help = action.payload.help;
         state.error = null;
       })
@@ -105,4 +119,3 @@ export const { setSettings, setThemeColor, setCompanyLogo, clearSettings } =
   settingsSlice.actions;
 
 export default settingsSlice.reducer;
-
