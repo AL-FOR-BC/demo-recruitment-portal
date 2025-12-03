@@ -134,7 +134,6 @@ const JobCard = ({ job }: { job: JobPosition }) => {
 
   const handleApplyNow = async () => {
     try {
-       
       if (!profile) {
         toast.error("Please complete your profile first");
         navigate("/profile");
@@ -336,7 +335,7 @@ const JobCard = ({ job }: { job: JobPosition }) => {
             View Details
           </button>
           <button
-            onClick={handleApplyNow }
+            onClick={handleApplyNow}
             disabled={applicationLoading}
             className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-all
               ${
@@ -416,9 +415,11 @@ const Dashboard = () => {
     loading: jobsLoading,
     error: jobsError,
   } = useAppSelector((state) => state.app.job);
-  const { loading: profileLoading, error: profileError } = useAppSelector(
-    (state) => state.app.profile
-  );
+  const {
+    data: profileData,
+    loading: profileLoading,
+    error: profileError,
+  } = useAppSelector((state) => state.app.profile);
   const navigate = useNavigate();
   const companyName = useCompanyName();
 
@@ -429,14 +430,30 @@ const Dashboard = () => {
         return;
       }
 
-      try {
-        const profileResult = await dispatch(fetchProfile()).unwrap();
+      // Only fetch profile if we don't have data or error yet
+      if (profileData === null && profileError === null && !profileLoading) {
+        try {
+          const profileResult = await dispatch(fetchProfile()).unwrap();
 
-        if (!profileResult) {
-          navigate("/profile");
-          return;
+          // Only fetch jobs if profile exists
+          if (profileResult) {
+            const today = new Date();
+            const formattedDate = today.toISOString().split("T")[0];
+            await dispatch(
+              fetchJobs({
+                companyId,
+                endpoint: "RecruitmentProjectPositions",
+                userEmail: user?.email,
+                filterQuery: `$filter=applicationSubmissionDeadline gt ${formattedDate}`,
+              })
+            );
+          }
+        } catch (error: any) {
+          console.error("Error fetching profile:", error);
+          // If profile fetch fails, don't fetch jobs
         }
-
+      } else if (profileData && jobs.length === 0 && !jobsLoading) {
+        // If we have a profile, fetch jobs if we haven't already
         const today = new Date();
         const formattedDate = today.toISOString().split("T")[0];
         await dispatch(
@@ -447,20 +464,25 @@ const Dashboard = () => {
             filterQuery: `$filter=applicationSubmissionDeadline gt ${formattedDate}`,
           })
         );
-      } catch (error: any) {
-        console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, [companyId, dispatch, navigate, user?.email]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId, user?.email]);
 
   // Add a message to show job visibility status
   const isInternalUser = user?.email
     ?.toLowerCase()
     .endsWith("@reachoutmbuya.org");
 
-  const loading = jobsLoading || profileLoading;
+  // Check if profile exists - if not, show profile creation message
+  const hasProfile = profileData !== null;
+
+  // Only show loading if we're actually loading and don't have an error yet
+  const loading =
+    (profileLoading && !profileError && !profileData) ||
+    (jobsLoading && hasProfile && jobs.length === 0);
   const error = jobsError || profileError;
 
   if (loading) {
@@ -473,43 +495,44 @@ const Dashboard = () => {
     );
   }
 
-  if (error) {
-    console.log(error);
-    if (error.toString().includes("Failed to fetch profile")) {
-      return (
-        <DashboardLayout>
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Welcome to {companyName} Recruitment
-              </h2>
-              <p className="text-gray-600 max-w-md">
-                To start applying for jobs, please create your profile first
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/profile")}
-              className="px-6 py-3 bg-[#0D55A3] text-white rounded-lg hover:bg-[#0D55A3]/90 transition-colors font-medium flex items-center gap-2 shadow-lg"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Create Your Profile
-            </button>
+  // Show profile creation message if no profile exists
+  if (!hasProfile || profileError) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+          <div className="text-center space-y-3">
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Welcome to {companyName} Recruitment
+            </h2>
+            <p className="text-gray-600 max-w-md">
+              To start applying for jobs, please create your profile first
+            </p>
           </div>
-        </DashboardLayout>
-      );
-    }
+          <button
+            onClick={() => navigate("/profile")}
+            className="px-6 py-3 bg-[#0D55A3] text-white rounded-lg hover:bg-[#0D55A3]/90 transition-colors font-medium flex items-center gap-2 shadow-lg"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Create Your Profile
+          </button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
     return (
       <DashboardLayout>
         <div className="text-red-500">Error loading data: {error}</div>

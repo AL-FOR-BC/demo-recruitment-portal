@@ -229,12 +229,9 @@ export const UserSignIn = async (
               otp_expiry: otp_expiry,
             },
           });
-          await sendEmail(
-            email,
-            user.fullname,
-            `${otp}`,
-            "Please verify your email to continue"
-          );
+          const companyName = await getCompanyName();
+          const subject = `${companyName} E-Recruitment OTP`;
+          await sendEmail(email, subject, `${otp}`, user.fullname);
           const signature = await GenerateSignature({
             id: profile.id.toString(),
             email: profile.email,
@@ -249,7 +246,7 @@ export const UserSignIn = async (
           return;
         }
         const config = await db.bc_configs.findUnique({
-          where: { id: "1" },
+          where: { id: "2" },
         });
         if (config) {
           const signature = await GenerateSignature({
@@ -313,12 +310,8 @@ export const ResendOtp = async (
           },
         });
         const companyName = await getCompanyName();
-        await sendEmail(
-          email,
-          userV1.fullname,
-          `${companyName} E-Recruitment OTP`,
-          otp.toString()
-        );
+        const subject = `${companyName} E-Recruitment OTP`;
+        await sendEmail(email, subject, otp.toString(), userV1.fullname);
         res.status(200).json({ message: "OTP sent" });
         return;
       }

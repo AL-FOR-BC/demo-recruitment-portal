@@ -115,12 +115,13 @@ export const sendEmail = async (
     subject: subject,
     html: emailHtml,
   };
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return error;
-    } else {
-      console.log("Email sent: " + info.response);
-      return "Email sent: " + info.response;
-    }
-  });
+  
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: " + info.response);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
 };

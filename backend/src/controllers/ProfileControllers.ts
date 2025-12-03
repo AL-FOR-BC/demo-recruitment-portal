@@ -190,10 +190,79 @@ export const GetUserProfile: RequestHandler = async (
       return;
     }
 
-    res.status(200).json({
-      ...profile,
-      birth_date: profile.birth_date?.toISOString().split("T")[0],
-    });
+    // Convert Mongoose document to plain object if needed
+    let profileData: any;
+    if (profile && typeof profile.toObject === "function") {
+      // It's a Mongoose document, convert to plain object
+      profileData = profile.toObject();
+    } else if (profile && (profile as any)._doc) {
+      // It's a Mongoose document with _doc property
+      profileData = (profile as any)._doc;
+    } else {
+      // It's already a plain object (Prisma)
+      profileData = profile;
+    }
+
+    // Map camelCase fields to snake_case if they exist
+    const mappedProfile = {
+      email: profileData.email || profileData.Email,
+      first_name: profileData.first_name || profileData.firstName,
+      middle_name: profileData.middle_name || profileData.middleName || "",
+      last_name: profileData.last_name || profileData.lastName,
+      gender: profileData.gender || profileData.Gender,
+      applicant_address:
+        profileData.applicant_address ||
+        profileData.applicantAddress ||
+        profileData.Address2,
+      national_id_number:
+        profileData.national_id_number ||
+        profileData.nationalIdNumber ||
+        profileData.NationalIdNumber,
+      mobile_no:
+        profileData.mobile_no ||
+        profileData.mobileNo ||
+        profileData.MobilePhoneNo,
+      birth_date:
+        profileData.birth_date ||
+        profileData.birthDate ||
+        profileData.DateOfBirth,
+      birth_district:
+        profileData.birth_district ||
+        profileData.birthDistrict ||
+        profileData.DistrictOfBirth,
+      district_of_origin:
+        profileData.district_of_origin ||
+        profileData.districtOfOrigin ||
+        profileData.DistrictOfOrigin,
+      nationality: profileData.nationality || profileData.Nationality,
+      passport_number:
+        profileData.passport_number ||
+        profileData.passportNumber ||
+        profileData.PassportNo ||
+        "",
+      marital_status:
+        profileData.marital_status ||
+        profileData.maritalStatus ||
+        profileData.MaritalStatus,
+      relative_in_organisation:
+        profileData.relative_in_organisation !== undefined
+          ? profileData.relative_in_organisation
+          : profileData.relativeInOrganisation !== undefined
+          ? profileData.relativeInOrganisation
+          : false,
+      last_modified: profileData.last_modified || profileData.lastModified,
+    };
+
+    // Format birth_date if it exists
+    if (mappedProfile.birth_date) {
+      const birthDate =
+        mappedProfile.birth_date instanceof Date
+          ? mappedProfile.birth_date
+          : new Date(mappedProfile.birth_date);
+      mappedProfile.birth_date = birthDate.toISOString().split("T")[0];
+    }
+
+    res.status(200).json(mappedProfile);
   } catch (error: any) {
     console.error("Get Profile Error:", error);
     // Final check for "not found" errors

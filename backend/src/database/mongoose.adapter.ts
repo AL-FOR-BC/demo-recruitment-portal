@@ -61,7 +61,8 @@ export class MongooseAdapter implements IDatabaseAdapter {
 
   applicant_profile = {
     findUnique: async (args: { where: { email: string } }) => {
-      return await ApplicantProfile.findOne({ email: args.where.email });
+      const profile = await ApplicantProfile.findOne({ email: args.where.email }).lean();
+      return profile;
     },
     create: async (args: { data: any }) => {
       // Use email as _id
@@ -92,11 +93,12 @@ export class MongooseAdapter implements IDatabaseAdapter {
       if (updateData.last_modified === undefined) {
         updateData.last_modified = new Date();
       }
-      return await ApplicantProfile.findByIdAndUpdate(
+      const profile = await ApplicantProfile.findByIdAndUpdate(
         args.where.email,
         updateData,
-        { new: true }
+        { new: true, lean: true }
       );
+      return profile;
     },
   };
 
