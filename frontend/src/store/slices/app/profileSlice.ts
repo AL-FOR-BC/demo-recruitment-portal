@@ -24,45 +24,83 @@ export const fetchProfile = createAsyncThunk<
 >("profile/fetchProfile", async (_, { rejectWithValue }) => {
   try {
     const response = await apiProfile();
-    
+
     // Handle different response structures
     let profileData: any;
-    
+
     // If response has a data property, use it
-    if (response.data && typeof response.data === 'object') {
+    if (response.data && typeof response.data === "object") {
       profileData = response.data;
     } else {
       // Otherwise, use the response directly
       profileData = response;
     }
-    
+
     // Handle Mongoose document structure (_doc property)
     if (profileData._doc) {
       profileData = profileData._doc;
     }
-    
+
     // Convert camelCase to snake_case if needed
     const mappedProfile: ProfileData = {
       email: profileData.email || profileData.Email,
-      first_name: profileData.first_name || profileData.firstName || profileData.FirstName,
-      middle_name: profileData.middle_name || profileData.middleName || profileData.MiddleName || "",
-      last_name: profileData.last_name || profileData.lastName || profileData.LastName,
+      first_name:
+        profileData.first_name ||
+        profileData.firstName ||
+        profileData.FirstName,
+      middle_name:
+        profileData.middle_name ||
+        profileData.middleName ||
+        profileData.MiddleName ||
+        "",
+      last_name:
+        profileData.last_name || profileData.lastName || profileData.LastName,
       gender: profileData.gender || profileData.Gender || profileData.Sex,
-      applicant_address: profileData.applicant_address || profileData.applicantAddress || profileData.Address2 || "",
-      national_id_number: profileData.national_id_number || profileData.nationalIdNumber || profileData.NationalIdNumber,
-      mobile_no: profileData.mobile_no || profileData.mobileNo || profileData.MobilePhoneNo,
-      birth_date: profileData.birth_date || profileData.birthDate || profileData.DateOfBirth,
-      birth_district: profileData.birth_district || profileData.birthDistrict || profileData.DistrictOfBirth || "",
-      district_of_origin: profileData.district_of_origin || profileData.districtOfOrigin || profileData.DistrictOfOrigin || "",
+      applicant_address:
+        profileData.applicant_address ||
+        profileData.applicantAddress ||
+        profileData.Address2 ||
+        "",
+      national_id_number:
+        profileData.national_id_number ||
+        profileData.nationalIdNumber ||
+        profileData.NationalIdNumber,
+      mobile_no:
+        profileData.mobile_no ||
+        profileData.mobileNo ||
+        profileData.MobilePhoneNo,
+      birth_date:
+        profileData.birth_date ||
+        profileData.birthDate ||
+        profileData.DateOfBirth,
+      birth_district:
+        profileData.birth_district ||
+        profileData.birthDistrict ||
+        profileData.DistrictOfBirth ||
+        "",
+      district_of_origin:
+        profileData.district_of_origin ||
+        profileData.districtOfOrigin ||
+        profileData.DistrictOfOrigin ||
+        "",
       nationality: profileData.nationality || profileData.Nationality,
-      passport_number: profileData.passport_number || profileData.passportNumber || profileData.PassportNo || "",
-      marital_status: profileData.marital_status || profileData.maritalStatus || profileData.MaritalStatus,
-      relative_in_organisation: profileData.relative_in_organisation !== undefined 
-        ? profileData.relative_in_organisation 
-        : (profileData.relativeInOrganisation !== undefined ? profileData.relativeInOrganisation : false),
-      last_modified: profileData.last_modified || profileData.lastModified,
+      passport_number:
+        profileData.passport_number ||
+        profileData.passportNumber ||
+        profileData.PassportNo ||
+        "",
+      marital_status:
+        profileData.marital_status ||
+        profileData.maritalStatus ||
+        profileData.MaritalStatus,
+      relative_in_organisation:
+        profileData.relative_in_organisation !== undefined
+          ? profileData.relative_in_organisation
+          : profileData.relativeInOrganisation !== undefined
+          ? profileData.relativeInOrganisation
+          : false,
     };
-    
+
     return mappedProfile;
   } catch (error: any) {
     return rejectWithValue(
